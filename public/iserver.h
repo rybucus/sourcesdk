@@ -41,7 +41,8 @@ class IGameSpawnGroupMgr;
 struct EventServerAdvanceTick_t;
 struct EventServerPollNetworking_t;
 struct EventServerProcessNetworking_t;
-struct EventServerSimulate_t;
+struct EventServerBeginSimulate_t;
+struct EventServerEndSimulate_t;
 struct EventServerPostSimulate_t;
 struct SpawnGroupDesc_t;
 class IPrerequisite;
@@ -104,11 +105,9 @@ public:
 	virtual void	ServerPollNetworking( const EventServerPollNetworking_t & ) = 0;
 	virtual void	ServerProcessNetworking( const EventServerProcessNetworking_t & ) = 0;
 
-	virtual void	ServerSimulate( const EventServerSimulate_t & ) = 0;
+	virtual void	ServerBeginSimulate( const EventServerBeginSimulate_t & ) = 0;
+	virtual void	ServerEndSimulate( const EventServerEndSimulate_t & ) = 0;
 	virtual void	ServerPostSimulate( const EventServerPostSimulate_t & ) = 0;
-
-	// Flushes queued broadcast messages within the current per-tick budget.
-	virtual void	DispatchQueuedBroadcastMessages( void ) = 0;
 
 	virtual SpawnGroupHandle_t LoadSpawnGroup( const SpawnGroupDesc_t & ) = 0;
 	virtual void	AsyncUnloadSpawnGroup( unsigned int, /*ESpawnGroupUnloadOption*/ int ) = 0;
@@ -179,6 +178,8 @@ public:
 	virtual void 	DirectUpdate() = 0;
 
 	virtual CSteamID	GetGameServerSteamID() = 0;
+
+	virtual bool BroadcastVoiceData( int nEntityIndex, void *pVoiceData, uint64 xuidFrom ) = 0;
 };
 
 class CNetworkGameServerBase : public INetworkGameServer, protected IConnectionlessPacketHandler, protected IConVarListener
@@ -287,7 +288,6 @@ public:
 	INetworkStringTable* m_pInstanceBaselineTable;
 	INetworkStringTable* m_pLightStyleTable;
 	INetworkStringTable* m_pUserInfoTable;
-	INetworkStringTable* m_pServerStartupTable;
 
 	CFrameSnapshotManager* m_pFrameSnapshotManager;
 	CUtlLeanVector<byte> m_BaselineBuffer;
@@ -338,7 +338,7 @@ public:
 	uint64* m_pnReservationCookie;
 	float* m_pflTimeLastClientLeft;
 	float* m_pflReservationExpiryTime;
-	void* m_pUnk960;
+	void* m_pUnk952;
 
 	// handle = slot | (serial << 8). Init all 0xFFFF.
 	uint16 m_nClientSlotSerial[ABSOLUTE_PLAYER_LIMIT];
@@ -362,9 +362,9 @@ public:
 	uint64 m_nComputeTimeCount;
 
 	uint64 m_nReservationCookie;
+	uint64 m_nUnk1744;
 	uint64 m_nUnk1752;
-	uint64 m_nUnk1760;
-	int m_nUnk1768;
+	int m_nUnk1760;
 	void* m_pReplayDirector;
 };
 
@@ -377,7 +377,7 @@ public:
 	CPrecacheItem m_Precache[MAX_GENERIC];
 	INetworkStringTable* m_pGenericPrecacheTable;
 	bool m_bAllowSignonWrites;
-}; // sizeof 10064
+}; // sizeof 10056 (0x2748)
 
 
 class CHLTVServer : public CNetworkGameServerBase
