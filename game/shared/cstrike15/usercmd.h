@@ -97,20 +97,21 @@ public:
 	// ...
 };
 
-class CCSGOUserCmd : public CUserCmdBaseHost< CSGOUserCmdPB >
+class CUserCmd : public CUserCmdBaseHost< CSGOUserCmdPB >
 {
 public:
 	CInButtonState m_ButtonStates;
 
 private:
-	// Not part of the player message.
-	uint32 unknown[4];
+	char unknown[8];
 
 public:
-	CCSGOUserCmd *m_pPrev;
-	CCSGOUserCmd *m_pNext;
-};
+	double m_flExecutionTime;
+  float m_flCurrentTime;
+  bool m_bHasBeenPredicted;
+  int m_nCmdType;
+  int m_nCmdFlags;
 
-using CUserCmd = CCSGOUserCmd;
+};
 
 #endif // CSTRIKE15_USERCMD_H
