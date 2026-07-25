@@ -190,7 +190,24 @@ public:
 // adds no new vtable slots, so it is layout-compatible with the base.
 class CNetworkGameClient : public CNetworkGameClientBase
 {
+public:
+	char pad_0[ 0xC8 ];
+	bool m_bInSimulation; // 0x0D0
+	char pad_1[ 0x2F ]; 
+	bool m_bAllowClientSidePredict; // 0x100
+	char pad_2[ 0x14B ];
+	std::int32_t m_nDeltaTick; // 0x24C
+	char pad_3[ 0x128 ];
+	std::int32_t m_nClientTick; // 0x378
+	std::int32_t m_nServerTick; // 0x37C
+
 };
+
+static_assert( offsetof( CNetworkGameClient, m_bInSimulation ) == 0x0D0 );
+static_assert( offsetof( CNetworkGameClient, m_bAllowClientSidePredict ) == 0x100 );
+static_assert( offsetof( CNetworkGameClient, m_nDeltaTick ) == 0x24C );
+static_assert( offsetof( CNetworkGameClient, m_nClientTick ) == 0x378 );
+static_assert( offsetof( CNetworkGameClient, m_nServerTick ) == 0x37C );
 
 //-----------------------------------------------------------------------------
 // Purpose: "NetworkClientService_001" - engine service that owns the client.
