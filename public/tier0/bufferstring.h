@@ -447,7 +447,7 @@ public:
 	DLL_CLASS_IMPORT const char *StrAppendFormat( const char *pFormat, ... ) FMTFUNCTION(2, 3);
 
 	// Strips extension from filename.
-	DLL_CLASS_IMPORT const char *StripExtension( bool bUnknown = false );
+	DLL_CLASS_IMPORT const char *StripExtension( bool bStripAllExtensions = false );
 
 	// Remove trailing path separator.
 	DLL_CLASS_IMPORT const char *StripTrailingSlash();
