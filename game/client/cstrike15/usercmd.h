@@ -28,10 +28,7 @@ public:
 	int m_nCmdFlags;
 };
 
-// Cross-checked against the client command ring buffer, which holds 150 entries
-// and places the sequence number right after them at 0x5910 ( 150 * 0x98 ).
-COMPILE_TIME_ASSERT( sizeof( C_CSGOUserCmd ) == 0x98 );
-
-using CUserCmd = C_CSGOUserCmd;
+// Cross-checked against the client command ring buffer, which holds 150 entries.
+COMPILE_TIME_ASSERT( sizeof( C_CSGOUserCmd ) == 152 );
 
 #endif // CSTRIKE15_CLIENT_USERCMD_H
