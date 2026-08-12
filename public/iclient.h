@@ -29,22 +29,22 @@ abstract_class INetworkGameClient
 {
 public:
 	virtual void *unk000() = 0;
-	virtual void SetGameSpawnGroupMgr(IGameSpawnGroupMgr *pMgr) = 0; // 1
-	virtual int AddRef() = 0; // 2
-	virtual int Release() = 0; // 3
+	virtual void SetGameSpawnGroupMgr(IGameSpawnGroupMgr *pMgr) = 0;
+	virtual int AddRef() = 0;
+	virtual int Release() = 0;
 
-	// 4: returns &m_GlobalVars (embedded CGlobalVars at this+0x90). Client-side globals getter.
-	virtual CGlobalVars *GetGlobals() = 0; // 4
+	// Returns &m_GlobalVars (embedded CGlobalVars). Client-side globals getter.
+	virtual CGlobalVars *GetGlobals() = 0;
 
-	virtual int GetClientTickCount() = 0; // 5
-	virtual int GetServerTickCount() = 0; // 6
+	virtual int GetClientTickCount() = 0;
+	virtual int GetServerTickCount() = 0;
 	virtual void *unk007() = 0;
 	virtual void *unk008() = 0;
 	virtual void *unk009() = 0;
 	virtual void *unk010() = 0;
-	virtual void SetFrameTime(float flFrameTime) = 0; // 11
-	virtual void Connect(int nSplitScreenSlot, int nUnk, const void *pAddr) = 0; // 12
-	virtual void Disconnect(/*ENetworkDisconnectionReason*/ int reason) = 0; // 13
+	virtual void SetFrameTime(float flFrameTime) = 0;
+	virtual void Connect(int nSplitScreenSlot, int nUnk, const void *pAddr) = 0;
+	virtual void Disconnect(/*ENetworkDisconnectionReason*/ int reason) = 0;
 	virtual void *unk014() = 0;
 	virtual void *unk015() = 0;
 	virtual void *unk016() = 0;
@@ -53,31 +53,31 @@ public:
 	virtual void *unk019() = 0;
 	virtual void *unk020() = 0;
 	virtual void *unk021() = 0;
-	virtual void ClientPollNetworking(const void *pEvent) = 0; // 22
-	virtual void ClientProcessNetworking(const void *pEvent) = 0; // 23
+	virtual void ClientPollNetworking(const void *pEvent) = 0;
+	virtual void ClientProcessNetworking(const void *pEvent) = 0;
 	virtual void *unk024() = 0;
-	virtual void OnClientFrameSimulate(const void *pEvent) = 0; // 25
-	virtual void OnClientAdvanceTick(const void *pEvent) = 0; // 26
+	virtual void OnClientFrameSimulate(const void *pEvent) = 0;
+	virtual void OnClientAdvanceTick(const void *pEvent) = 0;
 	virtual void *unk027() = 0;
 	virtual void *unk028() = 0;
 	virtual void *unk029() = 0;
 	virtual void *unk030() = 0;
 	virtual void *unk031() = 0;
-	virtual void ForceFullUpdate(const char *pszReason) = 0; // 32
+	virtual void ForceFullUpdate(const char *pszReason) = 0;
 	virtual void *unk033() = 0;
 	virtual void *unk034() = 0;
 	virtual void *unk035() = 0;
-	virtual void ServerCmd(int nCommandSrc, const char *pszCmd) = 0; // 36
+	virtual void ServerCmd(int nCommandSrc, const char *pszCmd) = 0;
 	virtual void *unk037() = 0;
-	virtual void SendStringCmd(int nSplitScreenSlot, const char *pszCmd) = 0; // 38
-	virtual void SplitScreenConnect(int nSplitScreenSlot) = 0; // 39
-	virtual int GetMaxSplitScreenPlayers() = 0; // 40
+	virtual void SendStringCmd(int nSplitScreenSlot, const char *pszCmd) = 0;
+	virtual void SplitScreenConnect(int nSplitScreenSlot) = 0;
+	virtual int GetMaxSplitScreenPlayers() = 0;
 	virtual void *unk041() = 0;
 	virtual void *unk042() = 0;
 	virtual void *unk043() = 0;
 	virtual void *unk044() = 0;
 	virtual void *unk045() = 0;
-	virtual void PrepareSteamConnectResponse(uint64 nUnk, bool bUnk, const void *pAddr, void *pMsg) = 0; // 46
+	virtual void PrepareSteamConnectResponse(uint64 nUnk, bool bUnk, const void *pAddr, void *pMsg) = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -94,17 +94,17 @@ public:
 	virtual void *unk050() = 0;
 	virtual void *unk051() = 0;
 	virtual void *unk052() = 0;
-	virtual void SpewSerializer(const char *pszName) = 0; // 53
+	virtual void SpewSerializer(const char *pszName) = 0;
 	virtual void *unk054() = 0;
 	virtual void *unk055() = 0;
 	virtual void *unk056() = 0;
 	virtual void *StartChangeLevel() = 0; // 57
-	virtual void FinishChangeLevel(void *pState) = 0; // 58
+	virtual void FinishChangeLevel(void *pState) = 0;
 	virtual void *unk059() = 0;
 	virtual void *unk060() = 0;
 	virtual void *unk061() = 0;
 	virtual void *unk062() = 0;
-	virtual void TransmitNetChannel() = 0; // 63
+	virtual void TransmitNetChannel() = 0;
 	virtual void *unk064() = 0;
 	virtual void *unk065() = 0;
 	virtual void *unk066() = 0;
@@ -114,7 +114,7 @@ public:
 	virtual void *unk070() = 0;
 	virtual void *unk071() = 0;
 	virtual void *unk072() = 0;
-	virtual void ApplyClockDrift(int nServerTick, int nClientTick) = 0; // 73
+	virtual void ApplyClockDrift(int nServerTick, int nClientTick) = 0;
 	virtual void *unk074() = 0;
 	virtual void *unk075() = 0;
 	virtual void *unk076() = 0;
@@ -129,32 +129,32 @@ public:
 	virtual void *unk085() = 0;
 	virtual void *unk086() = 0;
 	virtual void *unk087() = 0;
-	virtual void ProcessTick(const void *msg) = 0; // 88
-	virtual void ProcessStringCmd(const void *msg) = 0; // 89
-	virtual void ProcessSetConVar(const void *msg) = 0; // 90
-	virtual void ProcessSignonState(const void *msg) = 0; // 91
+	virtual void ProcessTick(const void *msg) = 0;
+	virtual void ProcessStringCmd(const void *msg) = 0;
+	virtual void ProcessSetConVar(const void *msg) = 0;
+	virtual void ProcessSignonState(const void *msg) = 0;
 	virtual void *unk092() = 0;
-	virtual void ProcessSpawnGroup_Load(const void *msg) = 0; // 93
-	virtual void ProcessSpawnGroup_ManifestUpdate(const void *msg) = 0; // 94
-	virtual void ProcessSpawnGroup_Unload(const void *msg) = 0; // 95
-	virtual void ProcessSpawnGroup_SetCreationTick(const void *msg) = 0; // 96
+	virtual void ProcessSpawnGroup_Load(const void *msg) = 0;
+	virtual void ProcessSpawnGroup_ManifestUpdate(const void *msg) = 0;
+	virtual void ProcessSpawnGroup_Unload(const void *msg) = 0;
+	virtual void ProcessSpawnGroup_SetCreationTick(const void *msg) = 0;
 	virtual void *unk097() = 0;
 	virtual void *unk098() = 0;
 	virtual void *unk099() = 0;
 	virtual void *unk100() = 0;
-	virtual void ProcessServerInfo(const void *msg) = 0; // 101
-	virtual void ProcessClassInfo(const void *msg) = 0; // 102
+	virtual void ProcessServerInfo(const void *msg) = 0;
+	virtual void ProcessClassInfo(const void *msg) = 0;
 	virtual void *unk103() = 0;
 	virtual void *unk104() = 0;
 	virtual void *unk105() = 0;
 	virtual void *unk106() = 0;
 	virtual void *unk107() = 0;
-	virtual void ProcessCreateStringTable(const void *msg) = 0; // 108
-	virtual void ProcessUpdateStringTable(const void *msg) = 0; // 109
+	virtual void ProcessCreateStringTable(const void *msg) = 0;
+	virtual void ProcessUpdateStringTable(const void *msg) = 0;
 	virtual void *unk110() = 0;
 	virtual void *unk111() = 0;
-	virtual void ProcessSplitScreen(const void *msg) = 0; // 112
-	virtual void ProcessCmdKeyValues(const void *msg) = 0; // 113
+	virtual void ProcessSplitScreen(const void *msg) = 0;
+	virtual void ProcessCmdKeyValues(const void *msg) = 0;
 	virtual void *unk114() = 0;
 	virtual void *unk115() = 0;
 	virtual void *unk116() = 0;
@@ -168,21 +168,21 @@ public:
 	virtual void *unk124() = 0;
 	virtual void *unk125() = 0;
 	virtual void *unk126() = 0;
-	virtual void ProcessHltvReplay(const void *msg) = 0; // 127
+	virtual void ProcessHltvReplay(const void *msg) = 0;
 	virtual void *unk128() = 0;
 	virtual void *unk129() = 0;
-	virtual void Clear(bool bUnk) = 0; // 130
-	virtual void FullConnect(const void *pAddr) = 0; // 131
-	virtual void SetSignonState(/*SignonState_t*/ int state, int nUnk, const void *pMsg) = 0; // 132
+	virtual void Clear(bool bUnk) = 0;
+	virtual void FullConnect(const void *pAddr) = 0;
+	virtual void SetSignonState(/*SignonState_t*/ int state, int nUnk, const void *pMsg) = 0;
 	virtual void *unk133() = 0;
 	virtual void *unk134() = 0;
-	virtual void InstallStringTableCallbacks(const char *pszTableName) = 0; // 135
+	virtual void InstallStringTableCallbacks(const char *pszTableName) = 0;
 	virtual void *unk136() = 0;
-	virtual void ProcessPacketEntities(const void *msg) = 0; // 137
-	virtual void OnPreserveEntity(void *pReadInfo) = 0; // 138
-	virtual void CopyNewEntity(void *pReport, void *pReadInfo, void *pClientClass, int nUnk, unsigned int nUnk2) = 0; // 139
-	virtual void CopyExistingEntity(void *pReport, void *pReadInfo) = 0; // 140
-	virtual void OnReceivedUncompressedPacket() = 0; // 141
+	virtual void ProcessPacketEntities(const void *msg) = 0;
+	virtual void OnPreserveEntity(void *pReadInfo) = 0;
+	virtual void CopyNewEntity(void *pReport, void *pReadInfo, void *pClientClass, int nUnk, unsigned int nUnk2) = 0;
+	virtual void CopyExistingEntity(void *pReport, void *pReadInfo) = 0;
+	virtual void OnReceivedUncompressedPacket() = 0;
 	virtual void *unk142() = 0;
 };
 
@@ -190,16 +190,29 @@ public:
 // adds no new vtable slots, so it is layout-compatible with the base.
 class CNetworkGameClient : public CNetworkGameClientBase
 {
+private:
+	char pad_0[ 200 ];
 public:
-	char pad_0[ 0xC8 ];
-	bool m_bInSimulation; // 0x0D0
-	char pad_1[ 0x2F ]; 
-	bool m_bAllowClientSidePredict; // 0x100
-	char pad_2[ 0x14B ];
-	int32 m_nDeltaTick; // 0x24C
-	char pad_3[ 0x128 ];
-	int32 m_nClientTick; // 0x378
-	int32 m_nServerTick; // 0x37C
+	bool m_bInSimulation;
+
+private:
+	char pad_1[ 47 ];
+
+public:
+	bool m_bAllowClientSidePredict;
+
+private:
+	char pad_2[ 331 ];
+
+public:
+	int32 m_nDeltaTick;
+
+private:
+	char pad_3[ 296 ];
+
+public:
+	int32 m_nClientTick;
+	int32 m_nServerTick;
 
 };
 
@@ -210,10 +223,10 @@ public:
 abstract_class INetworkClientService : public IEngineService
 {
 public:
-	virtual ~INetworkClientService() = 0; // 22
+	virtual ~INetworkClientService() = 0;
 
-	// 23: returns m_pNetworkGameClient (this+0xA0). Verified against engine2.dll.
-	virtual CNetworkGameClient *GetNetworkGameClient() = 0; // 23
+	// Returns m_pNetworkGameClient
+	virtual CNetworkGameClient *GetNetworkGameClient() = 0;
 };
 
 #endif // ICLIENT_H

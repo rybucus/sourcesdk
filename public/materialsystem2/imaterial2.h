@@ -24,18 +24,20 @@ enum MaterialParamFlags_t : uint32
 
 struct MaterialParam_t
 {
-	Vector4D m_vValue;									// 0x0000
-	ResourceHandle_t m_hTexture;						// 0x0010
-	uint32 m_nValueHash;								// 0x0018
-	uint32 m_nFlags;									// 0x001C
-	void *m_pBlob;										// 0x0020
-	CUtlSymbolLarge m_symName;							// 0x0028
-	CUtlSymbolLarge m_symString;						// 0x0030
-	bool m_bShaderDefault;								// 0x0038
-	uint8 m_nUnknown0039[0x7];							// 0x0039 - 0x003F
+	Vector4D m_vValue;
+	ResourceHandle_t m_hTexture;
+	uint32 m_nValueHash;
+	uint32 m_nFlags;
+	void *m_pBlob;
+	CUtlSymbolLarge m_symName;
+	CUtlSymbolLarge m_symString;
+	bool m_bShaderDefault;
+
+private:
+	uint8 m_nUnknown0039[7];
 };
 
-COMPILE_TIME_ASSERT( sizeof( MaterialParam_t ) == 0x40 );
+COMPILE_TIME_ASSERT( sizeof( MaterialParam_t ) == 64 );
 
 //-----------------------------------------------------------------------------
 // A loaded Source 2 material.
@@ -51,9 +53,9 @@ COMPILE_TIME_ASSERT( sizeof( MaterialParam_t ) == 0x40 );
 abstract_class IMaterial2
 {
 public:
-	virtual const char *GetName() = 0;											// 0
+	virtual const char *GetName() = 0;
 	virtual void Unk_Slot1( void *p ) = 0;
-	virtual bool IsLoaded() = 0;												// 2
+	virtual bool IsLoaded() = 0;
 	virtual void Unk_Slot3( void *p ) = 0;
 	virtual void Unk_Slot4( void *p ) = 0;
 	virtual void Unk_Slot5( void *p ) = 0;
@@ -82,17 +84,18 @@ public:
 	virtual void Unk_Slot28( void *p ) = 0;
 	virtual void Unk_Slot29( void *p ) = 0;
 	virtual void Unk_Slot30( void *p ) = 0;
-	virtual int GetIntParam( const char *pName, int nFallback ) = 0;			// 31
-	virtual float GetFloatParam( const char *pName, float flFallback ) = 0;		// 32
-	virtual const char *GetStringParam( const char *pName, const char *pFallback ) = 0;					// 33
-	virtual ResourceHandle_t *GetTextureParam( ResourceHandle_t *pOut, const char *pName ) = 0;			// 34
-	virtual Vector4D *GetVecParam( Vector4D *pOut, const char *pName, const Vector4D *pFallback ) = 0;	// 35
+	virtual int GetIntParam( const char *pName, int nFallback ) = 0;
+	virtual float GetFloatParam( const char *pName, float flFallback ) = 0;
+	virtual const char *GetStringParam( const char *pName, const char *pFallback ) = 0;
+	virtual ResourceHandle_t *GetTextureParam( ResourceHandle_t *pOut, const char *pName ) = 0;
+	virtual Vector4D *GetVecParam( Vector4D *pOut, const char *pName, const Vector4D *pFallback ) = 0;
+
+private:
+	uint8 m_nUnknown0008[8];
 
 public:
-	uint8 m_nUnknown0008[0x8];							// 0x0008 - 0x000F ( 0x0000 holds the vtable pointer )
-
-	const char *m_pPath;								// 0x0010
-	CUtlVector< MaterialParam_t > m_Params;				// 0x0018
+	const char *m_pPath;
+	CUtlVector< MaterialParam_t > m_Params;
 };
 
 class InfoForResourceTypeIMaterial2

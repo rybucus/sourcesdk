@@ -27,23 +27,31 @@ enum PredictionReason_t : int
 //-----------------------------------------------------------------------------
 // Per-split-screen-slot prediction state.
 //
-// Reconstructed layout: only the offsets below are verified. The total size of
+// Reconstructed layout: only the represented field offsets are verified. The total size of
 // this structure is NOT verified, so the stride used by CUtlVector< PredictionSplit_t >
 // is an assumption; do not rely on it for anything other than the first element.
 //-----------------------------------------------------------------------------
 struct PredictionSplit_t
 {
-	uint8 m_nUnknown0000[0x10];							// 0x0000 - 0x000F
+private:
+	uint8 m_nUnknown0000[16];
 
-	CEntityInstance  *m_pController;				    // 0x0010
-	uint8 m_nUnknown0018[0x28];							// 0x0018 - 0x003F
+public:
+	CEntityInstance *m_pController;
 
-	CUtlLeanVector< CEntityInstance * > m_PredictedEntities;	// 0x0040
-	uint8 m_nUnknown0050[0x28];							// 0x0050 - 0x0077
+private:
+	uint8 m_nUnknown0018[40];
 
-	int m_nLastExecutedCommand;							// 0x0078
-	int m_nBasePredictedCommand;						// 0x007C
-	int m_nLastPredictedCommand;						// 0x0080
+public:
+	CUtlLeanVector< CEntityInstance * > m_PredictedEntities;
+
+private:
+	uint8 m_nUnknown0050[40];
+
+public:
+	int m_nLastExecutedCommand;
+	int m_nBasePredictedCommand;
+	int m_nLastPredictedCommand;
 };
 
 //-----------------------------------------------------------------------------
@@ -61,7 +69,7 @@ struct PredictionSplit_t
 // declared with that signature; the Unk_ prefix only means the NAME is
 // unverified.
 //
-// Only the field offsets marked below are verified, and the total size of the
+// Only the represented field offsets are verified, and the total size of the
 // class is NOT verified.
 //-----------------------------------------------------------------------------
 class CPrediction
@@ -69,30 +77,30 @@ class CPrediction
 public:
 	virtual bool Unk_Slot0( void *p ) = 0;
 	virtual void Unk_Slot1( void *p ) = 0;
-	virtual void Unk_Slot2() = 0;												// empty body
+	virtual void Unk_Slot2() {}
 	virtual void Unk_Slot3( void *p ) = 0;
 	virtual void Unk_Slot4( void *p ) = 0;
-	virtual void Unk_Slot5() = 0;												// empty body
-	virtual void Unk_Slot6() = 0;												// empty body
-	virtual int Unk_Slot7() = 0;												// returns the constant 4
+	virtual void Unk_Slot5() {}
+	virtual void Unk_Slot6() {}
+	virtual int Unk_Slot7() = 0; // returns the constant 4
 	virtual void Unk_Slot8( void *p ) = 0;
-	virtual bool Unk_Slot9() = 0;												// returns the constant 1
-	virtual int Unk_Slot10() = 0;												// returns the constant 2
+	virtual bool Unk_Slot9() = 0; // returns the constant 1
+	virtual int Unk_Slot10() = 0; // returns the constant 2
 
 	// Runs a full prediction pass. engine2!CNetworkGameClient::ClientSidePredict
 	// calls this through vtable+0x58 while m_bInSimulation is forced true.
-	virtual void Update( PredictionReason_t nReason ) = 0;						// 11
+	virtual void Update( PredictionReason_t nReason ) = 0;
 
-	virtual void NetUpdatePreStart() = 0;										// 12
-	virtual void NetUpdateStart() = 0;											// 13
-	virtual void PostEntityPacketReceived() = 0;								// 14
-	virtual void PostNetworkDataReceived( const PostDataUpdateCall_t *pCalls, uint64 nCount ) = 0;	// 15
+	virtual void NetUpdatePreStart() = 0;
+	virtual void NetUpdateStart() = 0;
+	virtual void PostEntityPacketReceived() = 0;
+	virtual void PostNetworkDataReceived( const PostDataUpdateCall_t *pCalls, uint64 nCount ) = 0;
 
 	virtual void Unk_Slot16( void *p ) = 0;
 	virtual void Unk_Slot17( void *p ) = 0;
 	virtual void Unk_Slot18( void *p ) = 0;
 	virtual void Unk_Slot19( void *p ) = 0;
-	virtual int Unk_Slot20() = 0;												// returns the int at 0x00EC
+	virtual int Unk_Slot20() = 0;
 	virtual void Unk_Slot21( void *p ) = 0;
 	virtual void Unk_Slot22( void *p ) = 0;
 	virtual void Unk_Slot23( void *p ) = 0;
@@ -109,29 +117,48 @@ public:
 	virtual void Unk_Slot30( void *p ) = 0;
 	virtual void Unk_Slot31( void *p ) = 0;
 
+private:
+	uint8 m_nUnknown0008[32];
+
 public:
-	uint8 m_nUnknown0008[0x20];							// 0x0008 - 0x0027 ( 0x0000 holds the primary vtable pointer )
-	void *m_pSecondaryVTable;							// 0x0028
+	void *m_pSecondaryVTable;
 
-	PredictionReason_t m_nPredictionReason;				// 0x0030
-	bool m_bInPrediction;								// 0x0034
-	bool m_bIsEnginePaused;								// 0x0035
-	uint8 m_nUnknown0036[0x2];							// 0x0036 - 0x0037
+	PredictionReason_t m_nPredictionReason;
+	bool m_bInPrediction;
+	bool m_bIsEnginePaused;
 
-	C_CSGOUserCmd *m_pPredictionCommand;				// 0x0038
+private:
+	uint8 m_nUnknown0036[2];
 
-	bool m_bPrintDebug;									// 0x0040
-	uint8 m_nUnknown0041[0x3];							// 0x0041 - 0x0043
-	int m_nSnapshotTick;								// 0x0044
-	uint8 m_nUnknown0048[0x8];							// 0x0048 - 0x004F
+public:
+	C_CSGOUserCmd *m_pPredictionCommand;
 
-	CUtlVector< PredictionSplit_t > m_Splits;			// 0x0050
-	CGlobalVarsBase m_SavedVars;						// 0x0068
-	uint8 m_nUnknown00C8[0x28];							// 0x00C8 - 0x00EF
+	bool m_bPrintDebug;
 
-	bool m_bPredictionStateChanged;						// 0x00F0
-	uint8 m_nUnknown00F1[0x1B];							// 0x00F1 - 0x010B
-	int m_nPredictedTickBase;							// 0x010C
+private:
+	uint8 m_nUnknown0041[3];
+
+public:
+	int m_nSnapshotTick;
+
+private:
+	uint8 m_nUnknown0048[8];
+
+public:
+	CUtlVector< PredictionSplit_t > m_Splits;
+	CGlobalVarsBase m_SavedVars;
+
+private:
+	uint8 m_nUnknown00C8[40];
+
+public:
+	bool m_bPredictionStateChanged;
+
+private:
+	uint8 m_nUnknown00F1[27];
+
+public:
+	int m_nPredictedTickBase;
 };
 
 #endif // PREDICTION_H
