@@ -12,7 +12,10 @@
 
 class CBaseEntity;
 class CBasePlayerController;
-class CUserCmd;
+// CPrediction lives in the client module, so this is the client command layout.
+// Named directly rather than through the CUserCmd alias, which cannot be
+// forward declared.
+class C_CSGOUserCmd;
 struct PostDataUpdateCall_t;
 
 // Reason passed to the engine-side client prediction entry point.
@@ -124,7 +127,7 @@ public:
 	bool m_bIsEnginePaused;								// 0x0035
 	uint8 m_nUnknown0036[0x2];							// 0x0036 - 0x0037
 
-	CUserCmd *m_pPredictionCommand;						// 0x0038
+	C_CSGOUserCmd *m_pPredictionCommand;				// 0x0038
 
 	bool m_bPrintDebug;									// 0x0040
 	uint8 m_nUnknown0041[0x3];							// 0x0041 - 0x0043

@@ -147,6 +147,10 @@ COMPILE_TIME_ASSERT( sizeof( C_CSGOUserCmd ) == 0x98 );
 // Neither CLIENT_DLL nor GAME_DLL is set by this project's build, so the alias
 // defaults to the client layout. Server-side consumers must define GAME_DLL, or
 // name CCSGOUserCmd directly.
+//
+// Note that this is an alias, so it cannot be forward declared. Code that only
+// needs a pointer should forward declare CCSGOUserCmd / C_CSGOUserCmd and name
+// that class directly rather than declaring `class CUserCmd;`.
 #if defined( GAME_DLL )
 using CUserCmd = CCSGOUserCmd;
 #else
