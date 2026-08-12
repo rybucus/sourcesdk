@@ -405,7 +405,7 @@ public:
 	/// Removes full file path portion from path
 	DLL_CLASS_IMPORT const char *RemoveFilePath();
 	DLL_CLASS_IMPORT const char *RemoveFirstDir( CBufferString *pRemovedDir = nullptr );
-	DLL_CLASS_IMPORT const char *RemoveToFileBase( bool bUnknown = false );
+	DLL_CLASS_IMPORT const char *RemoveToFileBase( bool bStripAllExtensions = false );
 
 	/// Fixes broken UTF8 encoding at the end of string
 	DLL_CLASS_IMPORT bool RemovePartialUTF8Tail( bool bDefault = false );
@@ -422,7 +422,7 @@ public:
 	DLL_CLASS_IMPORT const char *ReverseChars( int nStartIndex, int nChars );
 
 	// Strips any current extension from path and ensures that extension is the new extension.
-	DLL_CLASS_IMPORT const char *SetExtension( const char *pString, bool bUnknown = false );
+	DLL_CLASS_IMPORT const char *SetExtension( const char *pString, bool bStripAllExtensions = false );
 
 	// Adjusts string length manually.
 	DLL_CLASS_IMPORT char *SetLength( int nLength, bool bIgnoreAlignment = false, int *pNewCapacity = nullptr );
