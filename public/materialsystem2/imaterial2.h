@@ -36,11 +36,6 @@ struct MaterialParam_t
 };
 
 COMPILE_TIME_ASSERT( sizeof( MaterialParam_t ) == 0x40 );
-COMPILE_TIME_ASSERT( offsetof( MaterialParam_t, m_hTexture ) == 0x10 );
-COMPILE_TIME_ASSERT( offsetof( MaterialParam_t, m_pBlob ) == 0x20 );
-COMPILE_TIME_ASSERT( offsetof( MaterialParam_t, m_symName ) == 0x28 );
-COMPILE_TIME_ASSERT( offsetof( MaterialParam_t, m_bShaderDefault ) == 0x38 );
-COMPILE_TIME_ASSERT( sizeof( CUtlVector< MaterialParam_t > ) == 0x18 );
 
 //-----------------------------------------------------------------------------
 // A loaded Source 2 material.
@@ -57,36 +52,36 @@ abstract_class IMaterial2
 {
 public:
 	virtual const char *GetName() = 0;											// 0
-	virtual void Unk_Slot1( void *p ) = 0;										// 1
+	virtual void Unk_Slot1( void *p ) = 0;
 	virtual bool IsLoaded() = 0;												// 2
-	virtual void Unk_Slot3( void *p ) = 0;										// 3
-	virtual void Unk_Slot4( void *p ) = 0;										// 4
-	virtual void Unk_Slot5( void *p ) = 0;										// 5
-	virtual void Unk_Slot6( void *p ) = 0;										// 6
-	virtual void Unk_Slot7( void *p ) = 0;										// 7
-	virtual void Unk_Slot8( void *p ) = 0;										// 8
-	virtual void Unk_Slot9( void *p ) = 0;										// 9
-	virtual void Unk_Slot10( void *p ) = 0;										// 10
-	virtual void Unk_Slot11( void *p ) = 0;										// 11
-	virtual void Unk_Slot12( void *p ) = 0;										// 12
-	virtual void Unk_Slot13( void *p ) = 0;										// 13
-	virtual void Unk_Slot14( void *p ) = 0;										// 14
-	virtual void Unk_Slot15( void *p ) = 0;										// 15
-	virtual void Unk_Slot16( void *p ) = 0;										// 16
-	virtual void Unk_Slot17( void *p ) = 0;										// 17
-	virtual void Unk_Slot18( void *p ) = 0;										// 18
-	virtual void Unk_Slot19( void *p ) = 0;										// 19
-	virtual void Unk_Slot20( void *p ) = 0;										// 20
-	virtual void Unk_Slot21( void *p ) = 0;										// 21
-	virtual void Unk_Slot22( void *p ) = 0;										// 22
-	virtual void Unk_Slot23( void *p ) = 0;										// 23
-	virtual void Unk_Slot24( void *p ) = 0;										// 24
-	virtual void Unk_Slot25( void *p ) = 0;										// 25
-	virtual void Unk_Slot26( void *p ) = 0;										// 26
-	virtual void Unk_Slot27( void *p ) = 0;										// 27
-	virtual void Unk_Slot28( void *p ) = 0;										// 28
-	virtual void Unk_Slot29( void *p ) = 0;										// 29
-	virtual void Unk_Slot30( void *p ) = 0;										// 30
+	virtual void Unk_Slot3( void *p ) = 0;
+	virtual void Unk_Slot4( void *p ) = 0;
+	virtual void Unk_Slot5( void *p ) = 0;
+	virtual void Unk_Slot6( void *p ) = 0;
+	virtual void Unk_Slot7( void *p ) = 0;
+	virtual void Unk_Slot8( void *p ) = 0;
+	virtual void Unk_Slot9( void *p ) = 0;
+	virtual void Unk_Slot10( void *p ) = 0;
+	virtual void Unk_Slot11( void *p ) = 0;
+	virtual void Unk_Slot12( void *p ) = 0;
+	virtual void Unk_Slot13( void *p ) = 0;
+	virtual void Unk_Slot14( void *p ) = 0;
+	virtual void Unk_Slot15( void *p ) = 0;
+	virtual void Unk_Slot16( void *p ) = 0;
+	virtual void Unk_Slot17( void *p ) = 0;
+	virtual void Unk_Slot18( void *p ) = 0;
+	virtual void Unk_Slot19( void *p ) = 0;
+	virtual void Unk_Slot20( void *p ) = 0;
+	virtual void Unk_Slot21( void *p ) = 0;
+	virtual void Unk_Slot22( void *p ) = 0;
+	virtual void Unk_Slot23( void *p ) = 0;
+	virtual void Unk_Slot24( void *p ) = 0;
+	virtual void Unk_Slot25( void *p ) = 0;
+	virtual void Unk_Slot26( void *p ) = 0;
+	virtual void Unk_Slot27( void *p ) = 0;
+	virtual void Unk_Slot28( void *p ) = 0;
+	virtual void Unk_Slot29( void *p ) = 0;
+	virtual void Unk_Slot30( void *p ) = 0;
 	virtual int GetIntParam( const char *pName, int nFallback ) = 0;			// 31
 	virtual float GetFloatParam( const char *pName, float flFallback ) = 0;		// 32
 	virtual const char *GetStringParam( const char *pName, const char *pFallback ) = 0;					// 33
