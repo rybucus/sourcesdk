@@ -37,6 +37,6 @@ public:
 };
 
 // Cross-checked against the client command ring buffer, which holds 150 entries.
-COMPILE_TIME_ASSERT( sizeof( C_CSGOUserCmd ) == 0x98 );
+COMPILE_TIME_ASSERT( sizeof( C_CSGOUserCmd ) == 152 );
 
 #endif // CSTRIKE15_CLIENT_USERCMD_H
