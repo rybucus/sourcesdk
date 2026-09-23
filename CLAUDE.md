@@ -1,4 +1,4 @@
-# CLAUDE.md
+# Source SDK Agent Instructions
 
 Valve/Source SDK C++ with AlliedModders-specific modernizations. Keep edits local, conservative, and consistent with the surrounding file. Never reformat unrelated code.
 
@@ -9,6 +9,8 @@ This file is the Claude Code adaptation of [AGENTS.md](AGENTS.md), which is the 
 - Treat this repository root as the working directory unless the task explicitly points elsewhere.
 - Prefer existing project helpers, naming conventions, container types, allocation patterns, and platform abstractions over new generic utilities.
 - Source is mainly C and C++. Tooling is CMake, JSON manifests, and platform-specific SDK directories.
+- Library code lives in [common/](common/), [entity2/](entity2/), [game/](game/), [interfaces/](interfaces/), [mathlib/](mathlib/), [networksystem/](networksystem/), [public/](public/), [tier1/](tier1/). [tests/](tests/) holds the CTest suite, [sym/](sym/) the export maps, [lib/](lib/) the imported binaries (`tier0`, `steam_api`), [devtools/bin/](devtools/bin/) the per-platform `protoc`. [thirdparty/](thirdparty/) (`protobuf`, `game_protobufs`) is vendored/submodule — leave it alone unless the task is explicitly about it.
+- Project targets build as C17 / C++17; [tests/](tests/) requires C++23. Use what the module you are editing already has available.
 - Preserve compatibility with existing Source SDK code. Do not introduce modern C++ facilities into old subsystems unless nearby code already uses them or the task requires it.
 - Do not sort includes unless the touched file already uses sorted include groups — [.clang-format](.clang-format) sets `SortIncludes: false` intentionally.
 
@@ -17,6 +19,7 @@ This file is the Claude Code adaptation of [AGENTS.md](AGENTS.md), which is the 
 - Use Read / Grep / Glob for reading and searching. Do not shell out to `cat`, `grep`, `rg`, `find`, `sed`, or `head`.
 - Use Edit for partial changes; Write only for new files or a full replacement of a file already read.
 - Bash/PowerShell are for git, cmake, ninja, and other real commands — not file inspection.
+- When the `codebase-memory-mcp` server is active, `search_graph` / `trace_path` / `get_code_snippet` locate symbols across this header tree faster than a broad Grep. Confirm every hit against the file before relying on it.
 
 ## Formatting
 
@@ -46,6 +49,14 @@ while ( true )
 ```cpp
 template < size_t SIZE >
 CBufferStringN< SIZE >
+```
+
+- Spaces inside square brackets around an array's element count. Empty brackets stay tight:
+
+```cpp
+int m_nChild[ 2 ];
+char m_pGameInfoPath[ MAX_PATH ];
+int nValues[] = { 1, 2, 3 };
 ```
 
 - Same visual spacing for explicit casts in edited code:
@@ -114,19 +125,28 @@ int Length() const { return m_nLength; }
 
 For anything involving signatures, offsets, vtables, calling conventions, binary compatibility, gamedata, disassembly, or behavior reconstructed from a binary:
 
-- The `ida-mcp-*` MCP servers (`ida-mcp-13337` … `ida-mcp-13341`, one per open IDA instance on `127.0.0.1:<port>/mcp`) are the primary source for IDA-derived facts. Their tool schemas are deferred — load them with ToolSearch (`select:mcp__ida-mcp-13337__decompile,...`) before calling. `server_health` identifies which binary a port has open; check that before trusting a port number.
-- For IDAPython scripting (`py_eval` / `py_exec_file`), invoke the `ida-pro-mcp:idapython` skill first.
+- The `ida-pro-mcp` MCP server is the primary source for IDA-derived facts. Its tool schemas are deferred — load them with ToolSearch (`select:mcp__ida-pro-mcp__list_instances,mcp__ida-pro-mcp__decompile,...`) before calling.
+- One IDA instance is open per module. Call `list_instances` first, then `select_instance`; `server_health` confirms which binary an instance actually has loaded. The instance→binary mapping shifts between game builds — never carry it over from a previous session.
+- IDAPython runs through the same server: `py_eval` for expressions, `py_exec_file` for scripts.
 - Prefer direct evidence — functions, xrefs, names, types, strings, decompiler output — over memory or inference.
 - Never invent addresses, offsets, signatures, symbol names, or vtable indexes. If IDA is unavailable, say so explicitly and use repository evidence only.
 - Record important IDA-derived assumptions in the final response or a nearby technical comment when the code would otherwise be hard to justify.
 - For gamedata/signature changes, verify game, engine branch, platform, and binary version. Keep platform-specific entries separated; do not broaden a signature without evidence.
 - Every binary-reconstructed structure or class with a known size gets `COMPILE_TIME_ASSERT( sizeof( TypeName ) == 0xSize );` near the declaration that owns the layout. Use the size verified from the target binary, and guard platform- or branch-specific sizes with the matching preprocessor conditions.
 - Use string references as primary orientation when reconstructing fields: nearby literals, xrefs, logging/assert messages, schema names, RTTI/typeinfo, constructor/destructor references. Do not infer a semantic name from offset alone when string evidence exists.
+- Game modules are stripped, but the schema system embeds Itanium-mangled `typeid( T ).name()` strings; `find_regex` over strings recovers exact template signatures. A `_ZTS` string with no matching `_ZTI` object means the class is not polymorphic — do not give it a vtable.
 - Preserve exact field offsets and padding. Use explicit padding members only when the real field type or purpose is unknown, and name them so the offset range is clear.
 - Preserve exact vtable slot order. Never reorder, remove, or collapse virtual methods because their purpose is unknown — if a slot exists in the binary, the SDK declaration keeps a corresponding slot.
 - Mark unknown virtuals as `Unk_IntendedMethodName( void *p )` when a plausible name is known but the signature is not. Keep the placeholder in its exact slot and prefer a single opaque `void *p` until the signature is verified.
 - If neither name nor signature is known, use a slot-preserving name carrying the vtable index or offset; rename only once binary evidence supports the real meaning.
 - When a signature is partially known, do not "improve" it with guessed argument types. Keep opaque placeholders and document what evidence would replace them.
+
+Keep comments on reconstructed code down to what the reader cannot get from tooling:
+
+- Do not annotate members with their offsets. clangd in VS Code and CLion already show the offset on hover, so a `// 0x38` comment adds nothing and goes stale as soon as the layout shifts.
+- Do not name the library or module a reconstruction came from. That belongs in the reply or the commit message, not in the header.
+- Do not point at other headers by filename. Describe what a declaration is and how it behaves; where it lives is the include graph's job, and the reference rots when files move.
+- Do not add `AMNOTE:` markers. That marker is for repositories under the AlliedModders LLC organization; this fork does not introduce new ones.
 
 ## CMake Conventions
 
@@ -150,8 +170,10 @@ set(SOURCESDK_TIER1_SOURCE_FILES
 	- `SOURCESDK_CREATE_INTEFACE_OVERRIDE` (spelling as-is) for a custom `CreateInterface`; `SOURCESDK_ENABLE_TESTS` builds [tests/](tests/).
 	- `SOURCESDK_CONFIGURE_EXPORT_MAP`, `SOURCESDK_LINK_ENABLE_RPATH`, `SOURCESDK_LINK_USE_MOLD`, `SOURCESDK_LINK_STRIP_SYMBOLS`, `SOURCESDK_LINK_STRIP_CPP_EXPORTS` control Unix link behavior.
 	- `SOURCESDK_LINK_TIER0`, `SOURCESDK_LINK_STEAMWORKS` control imported shared libraries.
+	- `SOURCESDK_GENERATE_CLANGD` writes `.clangd` at the SDK root with the `sourcesdk` target flags, so clangd resolves SDK headers that have no `compile_commands.json` entry.
 	- `SOURCESDK_MALLOC_OVERRIDE`, `SOURCESDK_MSVC_RUNTIME_LIBRARY`, `SOURCESDK_USE_ABI0` affect ABI/runtime compatibility.
 - `append_sourcesdk_shared_library( LIB_NAME LIB_FILENAME_OUT IMPLIB_FILENAME_OUT )` resolves imported binary paths under `lib/<platform>/`, returns shared-library and import-library filenames through parent-scope outputs, and may copy/patch Linux shared libraries when `SOURCESDK_LINK_STRIP_CPP_EXPORTS` is on. Reuse it for imported Source SDK shared libraries such as `tier0` and `steam_api`.
+- `sourcesdk_generate_clangd( TARGET <target> [OUTPUT <file>] [PATH_MATCH <regex>...] )` in [cmake/sourcesdk/clangd.cmake](cmake/sourcesdk/clangd.cmake) writes a `.clangd` fragment with the target's include directories, definitions, compile options, and C++ standard flag via generator expressions. `PATH_MATCH` regexes are relative to the output file's directory. Projects that `add_subdirectory()` this repository call it for their own targets (e.g. headers of a single-TU plugin).
 - `sourcesdk_parse_game_manifests(...)` recursively parses `CMakeGameManifests.json`, follows `inherits`, extracts `name`, `game_dir`, `protobufs_dir`, `defines`, conditional `am_defines`, and contributes `SE_NAME`, `SE_GAME_DIR`, and game-specific definitions. Keep inherited entries minimal and validate configure output for the selected `SOURCESDK_GAME_TARGET`.
 - `append_proto_dirs( OUT_ARGS PROTO_DIRS )` converts proto include dirs into `-I...` arguments and writes to the named parent-scope variable — pass list variables carefully.
 - `sourcesdk_compile_protos( PROTO_FILENAMES PROTO_ARGS PROTO_DIR PROTO_OUTPUT_DIR LOGS_DIR ERROR_LOGS_DIR PROTO_OUT_PREFIX )` invokes the repository `protoc`, creates output/log/error dirs, and skips files whose `.pb.cc` already exists. Do not replace it with ad hoc `execute_process()`.
@@ -171,7 +193,10 @@ Pick the narrowest useful verification:
 | CMake / tooling | `cmake --preset <name>` configure, or the relevant preset build |
 | Gamedata | validate JSON syntax; verify signatures/offsets against binary evidence |
 
-- Presets live in [CMakePresets.json](CMakePresets.json): `VisualStudio` and the Ninja configs `Debug`, `RelWithDebInfo`, `Release`. All enable `SOURCESDK_ENABLE_TESTS`. Build dirs are `build/<hostSystemName>/<presetName>`.
+- Configure presets in [CMakePresets.json](CMakePresets.json): `VisualStudio` (Windows only) and the Ninja configs `Debug`, `RelWithDebInfo`, `Release`. All of them force `SOURCESDK_ENABLE_TESTS` on; the root option itself defaults to `OFF`. Build dirs are `build/<hostSystemName>/<presetName>`.
+- Build and test presets carry the same names, plus `VisualStudio\Debug` and `VisualStudio\Release`. Test presets run CTest with `outputOnFailure`.
+- [tests/](tests/) uses the in-repo runner under `tests/common/`, not an external framework — one executable per source file, registered as `<name>_tests` or `smoke_<name>_tests`. Narrow a run with `ctest --preset Debug -R utlvector`.
+- CI ([.github/workflows/](.github/workflows/)) configures and builds `Debug`, `RelWithDebInfo`, and `Release` on Linux, macOS, and Windows, and runs `ctest` on the Debug preset only.
 - Do not run expensive full builds unless the risk justifies it or the user asks.
 - If verification could not be run, state exactly what was not run and why. Never report a build or test as passing that you did not observe pass.
 
@@ -220,4 +245,4 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 
 When the session is compacted, the summary must preserve the current task, repository state, files changed, commands run, verification status, open risks, and exact next steps.
 
-This `CLAUDE.md` stays in force across compaction. After compaction, keep following it strictly rather than reverting to generic defaults — especially the code style, CMake conventions, `ida-mcp-*` usage for reverse-engineering work, and workspace safety rules.
+This `CLAUDE.md` stays in force across compaction. After compaction, keep following it strictly rather than reverting to generic defaults — especially the code style, CMake conventions, `ida-pro-mcp` usage for reverse-engineering work, and workspace safety rules.

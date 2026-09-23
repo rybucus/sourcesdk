@@ -40,6 +40,14 @@ template < size_t SIZE >
 CBufferStringN< SIZE >
 ```
 
+- Put spaces inside square brackets around an array's element count. Keep empty brackets tight:
+
+```cpp
+int m_nChild[ 2 ];
+char m_pGameInfoPath[ MAX_PATH ];
+int nValues[] = { 1, 2, 3 };
+```
+
 - For explicit casts in edited code, prefer the same visual spacing when practical:
 
 ```cpp
@@ -124,6 +132,7 @@ int Length() const { return m_nLength; }
 - Mark unknown virtual methods with the form `Unk_IntendedMethodName( void *p )` when there is a plausible intended method name but the signature is not known. Keep the placeholder in the exact vtable slot, use the project pointer style, and prefer a single opaque `void *p` parameter until the real signature is verified.
 - If neither the intended method name nor the signature is known, use a slot-preserving unknown name that includes the vtable index or offset, then rename only after IDA/binary evidence supports the real meaning.
 - When a method signature is partially known, do not "improve" it with guessed argument types. Keep opaque pointer/integer placeholders and document the evidence needed to replace them.
+- Do not point at other headers by filename in comments. Describe the declaration and its behavior; let the include graph express where it lives.
 
 ## CMake Conventions
 
@@ -147,8 +156,10 @@ set(SOURCESDK_TIER1_SOURCE_FILES
 	- `SOURCESDK_COMPILE_PROTOBUF` controls whether protobuf is built/generated as part of this project.
 	- `SOURCESDK_CONFIGURE_EXPORT_MAP`, `SOURCESDK_LINK_ENABLE_RPATH`, `SOURCESDK_LINK_USE_MOLD`, `SOURCESDK_LINK_STRIP_SYMBOLS`, and `SOURCESDK_LINK_STRIP_CPP_EXPORTS` control Unix link behavior.
 	- `SOURCESDK_LINK_TIER0` and `SOURCESDK_LINK_STEAMWORKS` control imported shared libraries.
+	- `SOURCESDK_GENERATE_CLANGD` writes `.clangd` next to the SDK root with the `sourcesdk` target flags, so clangd resolves SDK headers that have no entry in `compile_commands.json`.
 	- `SOURCESDK_MALLOC_OVERRIDE`, `SOURCESDK_MSVC_RUNTIME_LIBRARY`, and `SOURCESDK_USE_ABI0` affect ABI/runtime compatibility.
 - `append_sourcesdk_shared_library( LIB_NAME LIB_FILENAME_OUT IMPLIB_FILENAME_OUT )` resolves imported binary paths under `lib/<platform>/`, returns shared-library and import-library filenames through parent-scope output variables, and may copy/patch Linux shared libraries when `SOURCESDK_LINK_STRIP_CPP_EXPORTS` is enabled. Reuse it for Source SDK imported shared libraries such as `tier0` and `steam_api`.
+- `sourcesdk_generate_clangd( TARGET <target> [OUTPUT <file>] [PATH_MATCH <regex>...] )` (in `cmake/sourcesdk/clangd.cmake`) writes a `.clangd` fragment with the target's include directories, compile definitions, compile options, and C++ standard flag, evaluated through generator expressions at generate time. `PATH_MATCH` regexes are relative to the directory of the output file. Consumers that add this repository with `add_subdirectory()` call it for their own targets (headers of a single-TU plugin, for instance).
 - `sourcesdk_parse_game_manifests(...)` recursively parses `CMakeGameManifests.json`, follows `inherits`, extracts `name`, `game_dir`, `protobufs_dir`, `defines`, and conditional `am_defines`, then contributes `SE_NAME`, `SE_GAME_DIR`, and game-specific compile definitions. When changing manifests, keep inherited entries minimal and validate configure output for the selected `SOURCESDK_GAME_TARGET`.
 - `append_proto_dirs( OUT_ARGS PROTO_DIRS )` converts proto include directories into `-I...` arguments. Pass list variables carefully; this function writes the result to the named output variable in the parent scope.
 - `sourcesdk_compile_protos( PROTO_FILENAMES PROTO_ARGS PROTO_DIR PROTO_OUTPUT_DIR LOGS_DIR ERROR_LOGS_DIR PROTO_OUT_PREFIX )` invokes the repository `protoc`, creates output/log/error directories, and skips files whose generated `.pb.cc` already exists. Do not replace it with ad hoc `execute_process()` calls for project protos.
