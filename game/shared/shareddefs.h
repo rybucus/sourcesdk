@@ -14,7 +14,8 @@
 #include "basetypes.h"
 #include "bittools.h"
 
-#define TICK_INTERVAL			(gpGlobals->interval_per_tick)
+// Source 2 runs a fixed 64 tick simulation; CGlobalVarsBase no longer carries the interval.
+#define TICK_INTERVAL			(1.0f / 64.0f)
 
 
 #define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
