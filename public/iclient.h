@@ -114,8 +114,8 @@ public:
 	virtual void *unk070() = 0;
 	virtual void *unk071() = 0;
 	virtual void *unk072() = 0;
-	virtual void ApplyClockDrift(int nServerTick, int nClientTick) = 0;
-	virtual void *unk074() = 0;
+	virtual void *unk073() = 0;
+	virtual void ApplyClockDrift(int nServerTick, int nClientTick) = 0; // 74
 	virtual void *unk075() = 0;
 	virtual void *unk076() = 0;
 	virtual void *unk077() = 0;
@@ -129,33 +129,33 @@ public:
 	virtual void *unk085() = 0;
 	virtual void *unk086() = 0;
 	virtual void *unk087() = 0;
-	virtual void ProcessTick(const void *msg) = 0;
+	virtual void *unk088() = 0;
+	virtual void ProcessTick(const void *msg) = 0; // 89
 	virtual void ProcessStringCmd(const void *msg) = 0;
 	virtual void ProcessSetConVar(const void *msg) = 0;
 	virtual void ProcessSignonState(const void *msg) = 0;
-	virtual void *unk092() = 0;
-	virtual void ProcessSpawnGroup_Load(const void *msg) = 0;
+	virtual void *unk093() = 0;
+	virtual void ProcessSpawnGroup_Load(const void *msg) = 0; // 94
 	virtual void ProcessSpawnGroup_ManifestUpdate(const void *msg) = 0;
 	virtual void ProcessSpawnGroup_Unload(const void *msg) = 0;
-	virtual void ProcessSpawnGroup_SetCreationTick(const void *msg) = 0;
-	virtual void *unk097() = 0;
+	virtual void ProcessSpawnGroup_SetCreationTick(const void *msg) = 0; // 97
 	virtual void *unk098() = 0;
 	virtual void *unk099() = 0;
 	virtual void *unk100() = 0;
-	virtual void ProcessServerInfo(const void *msg) = 0;
+	virtual void *unk101() = 0;
+	virtual void ProcessServerInfo(const void *msg) = 0; // 102
 	virtual void ProcessClassInfo(const void *msg) = 0;
-	virtual void *unk103() = 0;
 	virtual void *unk104() = 0;
 	virtual void *unk105() = 0;
 	virtual void *unk106() = 0;
 	virtual void *unk107() = 0;
-	virtual void ProcessCreateStringTable(const void *msg) = 0;
+	virtual void *unk108() = 0;
+	virtual void ProcessCreateStringTable(const void *msg) = 0; // 109
 	virtual void ProcessUpdateStringTable(const void *msg) = 0;
-	virtual void *unk110() = 0;
 	virtual void *unk111() = 0;
-	virtual void ProcessSplitScreen(const void *msg) = 0;
+	virtual void *unk112() = 0;
+	virtual void ProcessSplitScreen(const void *msg) = 0; // 113
 	virtual void ProcessCmdKeyValues(const void *msg) = 0;
-	virtual void *unk114() = 0;
 	virtual void *unk115() = 0;
 	virtual void *unk116() = 0;
 	virtual void *unk117() = 0;
@@ -168,22 +168,24 @@ public:
 	virtual void *unk124() = 0;
 	virtual void *unk125() = 0;
 	virtual void *unk126() = 0;
-	virtual void ProcessHltvReplay(const void *msg) = 0;
+	virtual void *unk127() = 0;
 	virtual void *unk128() = 0;
-	virtual void *unk129() = 0;
-	virtual void Clear(bool bUnk) = 0;
+	virtual void ProcessHltvReplay(const void *msg) = 0; // 129
+	virtual void *unk130() = 0;
+	virtual void *unk131() = 0;
+	virtual void Clear(bool bUnk) = 0; // 132
 	virtual void FullConnect(const void *pAddr) = 0;
-	virtual void SetSignonState(/*SignonState_t*/ int state, int nUnk, const void *pMsg) = 0;
-	virtual void *unk133() = 0;
-	virtual void *unk134() = 0;
-	virtual void InstallStringTableCallbacks(const char *pszTableName) = 0;
+	virtual void SetSignonState(/*SignonState_t*/ int state, int nUnk, const void *pMsg) = 0; // 134
+	virtual void *unk135() = 0;
 	virtual void *unk136() = 0;
-	virtual void ProcessPacketEntities(const void *msg) = 0;
+	virtual void InstallStringTableCallbacks(const char *pszTableName) = 0;
+	virtual void *unk138() = 0;
+	virtual void ProcessPacketEntities(const void *msg) = 0; // 139
 	virtual void OnPreserveEntity(void *pReadInfo) = 0;
 	virtual void CopyNewEntity(void *pReport, void *pReadInfo, void *pClientClass, int nUnk, unsigned int nUnk2) = 0;
 	virtual void CopyExistingEntity(void *pReport, void *pReadInfo) = 0;
-	virtual void OnReceivedUncompressedPacket() = 0;
-	virtual void *unk142() = 0;
+	virtual void OnReceivedUncompressedPacket() = 0; // 143
+	virtual void *unk144() = 0;
 };
 
 // The most-derived client class. Overrides a handful of base virtuals but
@@ -208,7 +210,7 @@ public:
 	int32 m_nDeltaTick;
 
 private:
-	char pad_3[ 296 ];
+	char pad_3[ 328 ];
 
 public:
 	int32 m_nClientTick;
