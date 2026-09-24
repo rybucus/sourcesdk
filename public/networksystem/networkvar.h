@@ -37,6 +37,9 @@ public:
 	using BaseClass::BaseClass;
 };
 
+template < class T, typename I = int >
+using CNetworkUtlVector = CNetworkUtlVectorBase< T, void, -1, I >;
+
 // Placeholder name - the variant used when the path to the vector runs through one or more
 // pointers, so it has to carry its own owner and field path instead of a flat offset. 
 // The fields are reconstructed; the engine's own name for this template is not known yet, so treat the name here as
