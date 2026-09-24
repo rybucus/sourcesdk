@@ -8,8 +8,10 @@
 #include "tier1/utlsymbollarge.h"
 #include "tier1/utlvector.h"
 #include "tier1/utldict.h"
+#include "tier1/utldelegate.h"
 #include "entity2/entitycomponent.h"
 #include "entityhandle.h"
+#include "variant.h"
 #include "networksystem/iflattenedserializers.h"
 
 enum EntityClassFlags_t
