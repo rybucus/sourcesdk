@@ -6,7 +6,6 @@
 #endif
 
 #include "string_t.h"
-#include "datamap.h"
 #include "vector.h"
 #include "vector2d.h"
 #include "vector4d.h"
@@ -21,6 +20,109 @@
 #include "tier0/memdbgon.h"
 
 FORWARD_DECLARE_HANDLE( HSCRIPT );
+
+typedef enum _fieldtypes : uint8
+{
+	FIELD_VOID = 0,			// No type or value
+	FIELD_FLOAT32,			// Any floating point value
+	FIELD_STRING,			// A string ID (return from ALLOC_STRING)
+	FIELD_VECTOR,			// Any vector, QAngle, or AngularImpulse
+	FIELD_QUATERNION,		// A quaternion
+	FIELD_INT32,			// Any integer or enum
+	FIELD_BOOLEAN,			// boolean, implemented as an int, I may use this as a hint for compression
+	FIELD_INT16,			// 2 byte integer
+	FIELD_CHARACTER,		// a byte
+	FIELD_COLOR32,			// 8-bit per channel r,g,b,a (32bit color)
+	FIELD_EMBEDDED,			// an embedded object with a datadesc, recursively traverse and embedded class/structure based on an additional typedescription
+	FIELD_CUSTOM,			// special type that contains function pointers to it's read/write/parse functions
+
+	FIELD_CLASSPTR,			// CBaseEntity *
+	FIELD_EHANDLE,			// Entity handle
+
+	FIELD_POSITION_VECTOR,	// A world coordinate (these are fixed up across level transitions automagically)
+	FIELD_TIME,				// a floating point time (these are fixed up automatically too!)
+	FIELD_TICK,				// an integer tick count( fixed up similarly to time)
+	FIELD_SOUNDNAME,		// Engine string that is a sound name (needs precache)
+
+	FIELD_INPUT,			// a list of inputed data fields (all derived from CMultiInputVar)
+	FIELD_FUNCTION,			// A class function pointer (Think, Use, etc)
+
+	FIELD_VMATRIX,			// a vmatrix (output coords are NOT worldspace)
+
+	// NOTE: Use float arrays for local transformations that don't need to be fixed up.
+	FIELD_VMATRIX_WORLDSPACE,// A VMatrix that maps some local space to world space (translation is fixed up on level transitions)
+	FIELD_MATRIX3X4_WORLDSPACE,	// matrix3x4_t that maps some local space to world space (translation is fixed up on level transitions)
+
+	FIELD_INTERVAL,			// a start and range floating point interval ( e.g., 3.2->3.6 == 3.2 and 0.4 )
+	FIELD_UNUSED,
+
+	FIELD_VECTOR2D,			// 2 floats
+	FIELD_INT64,			// 64bit integer
+
+	FIELD_VECTOR4D,			// 4 floats
+
+	FIELD_RESOURCE,
+
+	FIELD_TYPEUNKNOWN,
+
+	FIELD_CSTRING,
+	FIELD_HSCRIPT,
+	FIELD_VARIANT,
+	FIELD_UINT64,
+	FIELD_FLOAT64,
+	FIELD_POSITIVEINTEGER_OR_NULL,
+	FIELD_HSCRIPT_NEW_INSTANCE,
+	FIELD_UINT32,
+	FIELD_UTLSTRINGTOKEN,
+	FIELD_QANGLE,
+	FIELD_NETWORK_ORIGIN_CELL_QUANTIZED_VECTOR,
+	FIELD_HMATERIAL,
+	FIELD_HMODEL,
+	FIELD_NETWORK_QUANTIZED_VECTOR,
+	FIELD_NETWORK_QUANTIZED_FLOAT,
+	FIELD_DIRECTION_VECTOR_WORLDSPACE,
+	FIELD_QANGLE_WORLDSPACE,
+	FIELD_QUATERNION_WORLDSPACE,
+	FIELD_HSCRIPT_LIGHTBINDING,
+	FIELD_V8_VALUE,
+	FIELD_V8_OBJECT,
+	FIELD_V8_ARRAY,
+	FIELD_V8_CALLBACK_INFO,
+	FIELD_UTLSTRING,
+
+	FIELD_NETWORK_ORIGIN_CELL_QUANTIZED_POSITION_VECTOR,
+	FIELD_HRENDERTEXTURE,
+
+	FIELD_HPARTICLESYSTEMDEFINITION,
+	FIELD_UINT8,
+	FIELD_UINT16,
+	FIELD_CTRANSFORM,
+	FIELD_CTRANSFORM_WORLDSPACE,
+	FIELD_HPOSTPROCESSING,
+	FIELD_MATRIX3X4,
+	FIELD_SHIM,
+	FIELD_CMOTIONTRANSFORM,
+	FIELD_CMOTIONTRANSFORM_WORLDSPACE,
+	FIELD_ATTACHMENT_HANDLE,
+	FIELD_AMMO_INDEX,
+	FIELD_CONDITION_ID,
+	DEPRECATED_FIELD_AI_SCHEDULE_BITS,
+	FIELD_MODIFIER_HANDLE,
+	FIELD_ROTATION_VECTOR,
+	FIELD_ROTATION_VECTOR_WORLDSPACE,
+	FIELD_HVDATA,
+	FIELD_SCALE32,
+	FIELD_STRING_AND_TOKEN,
+	FIELD_ENGINE_TIME,
+	FIELD_ENGINE_TICK,
+	FIELD_WORLD_GROUP_ID,
+	FIELD_GLOBALSYMBOL,
+	FIELD_HNMGRAPHDEFINITION,
+	FIELD_NETWORK_QUANTIZED_VECTORWS,
+	FIELD_NETWORK_ORIGIN_CELL_QUANTIZED_VECTORWS,
+
+	FIELD_TYPECOUNT
+} fieldtype_t;
 
 // ========
 
@@ -65,6 +167,7 @@ inline const char *VariantFieldTypeName(fieldtype_t eType)
 		case FIELD_FLOAT32:					return "float32";
 		case FIELD_STRING:					return "string_t";
 		case FIELD_VECTOR:					return "vector";
+		case FIELD_POSITION_VECTOR:			return "vector";
 		case FIELD_QUATERNION:				return "quaternion";
 		case FIELD_INT32:					return "int32";
 		case FIELD_BOOLEAN:					return "boolean";
@@ -77,12 +180,14 @@ inline const char *VariantFieldTypeName(fieldtype_t eType)
 		case FIELD_RESOURCE:				return "resourcehandle";
 		case FIELD_CSTRING:					return "cstring";
 		case FIELD_HSCRIPT:					return "hscript";
+		case FIELD_HSCRIPT_NEW_INSTANCE:	return "hscript";
 		case FIELD_VARIANT:					return "variant";
 		case FIELD_UINT64:					return "uint64";
 		case FIELD_FLOAT64:					return "float64";
 		case FIELD_UINT32:					return "unsigned";
 		case FIELD_UTLSTRINGTOKEN:			return "utlstringtoken";
 		case FIELD_QANGLE:					return "qangle";
+		case FIELD_GLOBALSYMBOL:			return "globalsymbol";
 		case FIELD_HSCRIPT_LIGHTBINDING:	return "hscript_lightbinding";
 		case FIELD_V8_VALUE:				return "js_value";
 		case FIELD_V8_OBJECT:				return "js_object";
@@ -295,6 +400,30 @@ public:
 	~CVariantBase()
 	{
 		Free();
+	}
+
+	// Copies src the way the game's entity I/O does
+	void CopyFrom( const CVariantBase< A > &src )
+	{
+		switch ( src.m_type )
+		{
+			case FIELD_VECTOR:
+			case FIELD_POSITION_VECTOR:	CopyData( *src.m_pVector, true ); break;
+			case FIELD_QUATERNION:		CopyData( *src.m_pQuaternion, true ); break;
+			case FIELD_VECTOR2D:		CopyData( *src.m_pVector2D, true ); break;
+			case FIELD_VECTOR4D:		CopyData( *src.m_pVector4D, true ); break;
+			case FIELD_QANGLE:			CopyData( *src.m_pQAngle, true ); break;
+			case FIELD_CSTRING:			CopyData( src.m_pszString, true ); break;
+			default:
+			{
+				Free();
+
+				m_type = src.m_type;
+				m_pData = src.m_pData;
+
+				break;
+			}
+		}
 	}
 
 	// Frees the internal buffer and resets the value to be FIELD_VOID
@@ -850,17 +979,19 @@ public:
 		return false;
 	}
 
-	// Allocates own buffers and copies the internal value when needed, if silent = false, emits a global warning
-	void ConvertToCopiedData(bool silent = true) const
+	void ConvertToCopiedData(bool silent = true)
 	{
+		if(m_flags & CV_FREE)
+			return;
+
 		switch(m_type)
 		{
 			case FIELD_VECTOR:		CopyData(*m_pVector, true); break;
+			case FIELD_POSITION_VECTOR:	CopyData(*m_pVector, true); m_type = FIELD_POSITION_VECTOR; break;
 			case FIELD_VECTOR2D:	CopyData(*m_pVector2D, true); break;
 			case FIELD_VECTOR4D:	CopyData(*m_pVector4D, true); break;
 			case FIELD_QUATERNION:	CopyData(*m_pQuaternion, true); break;
 			case FIELD_QANGLE:		CopyData(*m_pQAngle, true); break;
-			case FIELD_COLOR32:		CopyData(*m_pColor, true); break;
 			case FIELD_CSTRING:		CopyData(m_pszString, true); break;
 			default:
 			{

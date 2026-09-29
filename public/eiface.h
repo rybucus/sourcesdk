@@ -27,6 +27,7 @@
 #include <steam/steamclientpublic.h>
 #include "playerslot.h"
 #include "playeruserid.h"
+#include "isource2engine.h"
 #include <iloopmode.h>
 #include "networkbasetypes.pb.h"
 #include "network_connection.pb.h"
@@ -59,8 +60,6 @@ class ISPSharedMemory;
 class CGamestatsData;
 class CEngineHltvInfo_t;
 class INetworkStringTable;
-class CResourceManifestPrerequisite;
-class CEntityLump;
 class IPVS;
 class IHLTVDirector;
 struct SpawnGroupDesc_t;
@@ -104,9 +103,14 @@ class CCLCMsg_Move_t;
 class CCLCMsg_SplitPlayerConnect_t;
 class CNetMessage;
 class INetworkMessageInternal;
+class INetChannel;
+class INetworkGameServer;
+class CUtlBuffer;
+class CEntityClass;
+class CSVCMsg_UserCommands_t;
+class ISceneViewDebugOverlays;
+struct FlattenedSerializerSpewField_t;
 struct Entity2Networkable_t;
-class CMovieRecorder;
-class IDemoFile;
 
 namespace google
 {
@@ -115,6 +119,8 @@ namespace google
 		class Message;
 	}
 }
+
+
 
 //-----------------------------------------------------------------------------
 // defines
@@ -134,26 +140,11 @@ struct bbox_t
 	Vector maxs;
 };
 
-//-----------------------------------------------------------------------------
-// Purpose: Interface the engine exposes to the game DLL and client DLL
-//-----------------------------------------------------------------------------
-abstract_class ISource2Engine : public IAppSystem
+enum ClientNetMessageHandlersAction_t
 {
-public:
-	// Is the game paused?
-	virtual bool		IsPaused() = 0;
-
-	// What is the game timescale multiplied with the host_timescale?
-	virtual float		GetTimescale( void ) const = 0;
-
-	virtual void		*FindOrCreateWorldSession( const char *pszWorldName, CResourceManifestPrerequisite * ) = 0;
-
-	virtual CEntityLump	*GetEntityLumpForTemplate( const char *, bool, const char *, const char * ) = 0;
-
-	virtual uint32		GetStatsAppID() const = 0;
-
-	virtual void		*UnknownFunc1(const char *pszFilename, void *pUnknown1, void *pUnknown2, void *pUnknown3) = 0;
-	virtual void		UnknownFunc2() = 0;
+	CLIENT_NET_MESSAGE_HANDLERS_INIT_AND_REGISTER = 0, // Also creates the shared message bindings on first use
+	CLIENT_NET_MESSAGE_HANDLERS_UNREGISTER = 1,
+	CLIENT_NET_MESSAGE_HANDLERS_REGISTER = 2,
 };
 
 //-----------------------------------------------------------------------------
@@ -351,183 +342,6 @@ public:
 	virtual void	*unk_121() = 0;
 };
 
-//-----------------------------------------------------------------------------
-// Purpose: Interface the engine exposes to the client DLL (Source2EngineToClient001).
-// Backed by CEngineClient in engine2.dll; own methods occupy vtable slots 18-184.
-// Unnamed slots (unkNNN) are not yet reversed for this build.
-//-----------------------------------------------------------------------------
-abstract_class IVEngineClient2 : public ISource2Engine
-{
-public:
-	virtual EUniverse GetSteamUniverse() const = 0;
-	virtual int &GetPlayerSlotByNetworkIDString(int &nSlot, const char *pszNetworkID) = 0;
-	virtual const char *GetPlayerNetworkIDString(int nSlot) = 0;
-	virtual int &GetLocalPlayer(int &nSlot, bool bUnk = false) = 0;
-	virtual int &GetLastValidPlayerSlot(int &nSlot, bool bUnk = false) = 0;
-	virtual bool IsPlayerSlotActive(int nSlot) = 0;
-	virtual float &GetFrameTime() = 0;
-	virtual void SetFrameTimeAmnesty(const char *pszReason, int nFrames, float flDuration) = 0;
-	virtual const char *GetFrameTimeAmnesty(bool bCheckCvar) = 0;
-	virtual void *unk027() = 0;
-	virtual void PrintVProfLiteReport(void *pReport, bool bDetailed, int nLogChannel) = 0;
-	virtual void DumpNetStats(void *pNetStatData, void (*pfnOutput)(const char *)) = 0;
-	virtual void *GetNetChannelInfo() = 0;
-	virtual uint32 GetLongFrameCount() = 0;
-	virtual bool GetPlayerInfo(int nPlayerIndex, void *pInfo) = 0;
-	virtual unsigned short &GetPlayerUserId(unsigned short &userid, int nPlayerIndex) = 0;
-	virtual int &GetSplitScreenPlayer(int &nPlayerSlot, int nSplitScreenSlot) = 0;
-	virtual int &GetSplitScreenSlotForPlayer(int &nSplitScreenSlot, int nPlayerSlot) = 0;
-	virtual float GetLastTimeStamp() = 0;
-	virtual int GetLastServerTick() = 0;
-	virtual int GetMaxClients() = 0;
-	virtual bool IsInGame() = 0;
-	virtual bool IsConnected() = 0;
-	virtual void *GetNetChannel(int nSplitScreenSlot) = 0;
-	virtual bool IsPlayingDemo() = 0;
-	virtual const char * GetDemoFilePath() = 0;
-	virtual bool IsRecordingDemo() = 0;
-	virtual bool IsPlayingTimeDemo() = 0;
-	virtual void *unk046() = 0;
-	virtual void *unk047() = 0;
-	virtual void *unk048() = 0;
-	virtual void *unk049() = 0;
-	virtual void *unk050() = 0;
-	virtual void ClientCommand(int iUnk0MaybeSplitScreenSlotSetTo0, const char * pszCommands, bool bUnrestricted, double flUnk = 0.0, uint64 nUnk = 0) = 0;
-	virtual void *unk052() = 0;
-	virtual void *unk053() = 0;
-	virtual void *unk054() = 0;
-	virtual void *unk055() = 0;
-	virtual bool IsSplitScreenActive() = 0;
-	virtual bool IsValidSplitScreenSlot(int nSplitScreenSlot) = 0;
-	virtual int &FirstValidSplitScreenSlot(int &nSplitScreenSlot) = 0;
-	virtual int &NextValidSplitScreenSlot(int &nSplitScreenSlot, int nPreviousSlot) = 0;
-	virtual void *unk060() = 0;
-	virtual void GetScreenSize(int& width, int& height) = 0;
-	virtual void *unk062() = 0;
-	virtual void OnEngineLevelLoadingFinished() = 0;
-	virtual const char *GetLevelName() = 0;
-	virtual const char *GetLevelNameShort() = 0;
-	virtual void *unk066() = 0;
-	virtual void *GetBroadcastRecorder() = 0;
-	virtual CMovieRecorder* GetMovieRecorder() = 0;
-	virtual IDemoFile* GetDemoFile() = 0;
-	virtual void *unk070() = 0;
-	virtual void *unk071() = 0;
-	virtual void *unk072() = 0;
-	virtual void *unk073() = 0;
-	virtual void *unk074() = 0;
-	virtual void *unk075() = 0;
-	virtual void *unk076() = 0;
-	virtual void *unk077() = 0;
-	virtual void *unk078() = 0;
-	virtual void *unk079() = 0;
-	virtual void *unk080() = 0;
-	virtual void *unk081() = 0;
-	virtual void *unk082() = 0;
-	virtual void *unk083() = 0;
-	virtual void *unk084() = 0;
-	virtual void *unk085() = 0;
-	virtual void *unk086() = 0;
-	virtual void *unk087() = 0;
-	virtual void *unk088() = 0;
-	virtual void *unk089() = 0;
-	virtual void *unk090() = 0;
-	virtual void *unk091() = 0;
-	virtual void *unk092() = 0;
-	virtual void *unk093() = 0;
-	virtual void *unk094() = 0;
-	virtual void *unk095() = 0;
-	virtual void *unk096() = 0;
-	virtual void *unk097() = 0;
-	virtual void *unk098() = 0;
-	virtual void *unk099() = 0;
-	virtual void *unk100() = 0;
-	virtual void *unk101() = 0;
-	virtual int RegisterDemoCustomDataCallback(const char *pszName, void *pfnCallback) = 0;
-	virtual void RecordDemoCustomData(int nCallbackID, const void *pData, int nSize) = 0;
-	virtual void *unk104() = 0;
-	virtual void *unk105() = 0;
-	virtual void *unk106() = 0;
-	virtual void *unk107() = 0;
-	virtual void *unk108() = 0;
-	virtual void *unk109() = 0;
-	virtual void *unk110() = 0;
-	virtual void *unk111() = 0;
-	virtual void *unk112() = 0;
-	virtual void *unk113() = 0;
-	virtual void *unk114() = 0;
-	virtual void *unk115() = 0;
-	virtual void *unk116() = 0;
-	virtual void *unk117() = 0;
-	virtual void *unk118() = 0;
-	virtual void *unk119() = 0;
-	virtual void *unk120() = 0;
-	virtual void *unk121() = 0;
-	virtual void *unk122() = 0;
-	virtual void *unk123() = 0;
-	virtual bool FlushGameWindow() = 0;
-	virtual void *unk125() = 0;
-	virtual void *unk126() = 0;
-	virtual void *unk127() = 0;
-	virtual void *unk128() = 0;
-	virtual int SOSSetOpvarFloat(const char *pszStackName, const char *pszOpvarName, float flValue) = 0;
-	virtual int SOSGetOpvarFloat(const char *pszStackName, const char *pszOpvarName, float *pflOut) = 0;
-	virtual void *unk131() = 0;
-	virtual void *unk132() = 0;
-	virtual void *unk133() = 0;
-	virtual void *unk134() = 0;
-	virtual void *unk135() = 0;
-	virtual void *unk136() = 0;
-	virtual void *unk137() = 0;
-	virtual void *unk138() = 0;
-	virtual void *unk139() = 0;
-	virtual void *unk140() = 0;
-	virtual void *unk141() = 0;
-	virtual void *unk142() = 0;
-	virtual void *unk143() = 0;
-	virtual void *unk144() = 0;
-	virtual void *unk145() = 0;
-	virtual void *unk146() = 0;
-	virtual void *unk147() = 0;
-	virtual void *unk148() = 0;
-	virtual const char *GetDefaultRenderSystemOption() = 0;
-	virtual void SetDefaultRenderSystemOption(const char *pszOption) = 0;
-	virtual void *unk151() = 0;
-	virtual uint64 GetRenderSystemOptionFlags() = 0;
-	virtual void SetRenderSystemOptionFlags(uint64 nValue, uint64 nMask) = 0;
-	virtual bool IsRenderSystemOptionRecommendationStale() = 0;
-	virtual void MarkRenderSystemOptionRecommended() = 0;
-	virtual void *unk156() = 0;
-	virtual void *unk157() = 0;
-	virtual void RunPanoramaAnimUpdate() = 0;
-	virtual void *unk159() = 0;
-	virtual void *unk160() = 0;
-	virtual void *unk161() = 0;
-	virtual void *unk162() = 0;
-	virtual void *unk163() = 0;
-	virtual void *unk164() = 0;
-	virtual void *unk165() = 0;
-	virtual void WriteMinidumpSystemInfo(void *pBuffer) = 0;
-	virtual bool GetLowViolence() = 0;
-	virtual void SetLowViolence(int nValue) = 0;
-	virtual void *unk169() = 0;
-	virtual void *unk170() = 0;
-	virtual void *unk171() = 0;
-	virtual void *unk172() = 0;
-	virtual void *unk173() = 0;
-	virtual void *unk174() = 0;
-	virtual void *unk175() = 0;
-	virtual void *unk176() = 0;
-	virtual void *unk177() = 0;
-	virtual void *unk178() = 0;
-	virtual void *unk179() = 0;
-	virtual void *unk180() = 0;
-	virtual int GetGlobalThreadPoolMode() = 0;
-	virtual const char *GetThreadPoolModeName(int nMode) = 0;
-	virtual void SetGlobalThreadPoolMode(int nMode) = 0;
-	virtual void *unk184() = 0;
-};
-
 abstract_class IServerGCLobby
 {
 public:
@@ -602,8 +416,11 @@ public:
 	virtual bool			GetNavMeshData( CNavData *pNavMeshData ) = 0;
 	virtual void			SetNavMeshData( const CNavData *navMeshData ) = 0;
 	virtual void			RegisterNavListener( INavListener *pNavListener ) = 0;
+
 	virtual void			UnregisterNavListener( INavListener *pNavListener ) = 0;
-	virtual void			*GetSpawnDebugInterface( void ) = 0;
+	// Enumerated by the engine while gathering state for a bug report; returns false past the last attachment.
+	// sName and sDescription end up in 32 and 64 character fields of the report.
+	virtual bool			GetBugReportAttachment( int nIndex, CUtlBuffer &buf, CUtlString &sName, CUtlString &sDescription ) = 0;
 
 	virtual IToolGameSimulationAPI *GetToolGameSimulationAPI( void ) = 0;
 	virtual void			GetAnimationActivityList( CUtlVector<CUtlString> &activityList ) = 0;
@@ -630,65 +447,98 @@ public:
 
 	virtual bool			SaveGame_CalcFileName( const char *pName, CUtlString &output ) const = 0;
 	virtual bool			GetLevelNameFromSaveFile( const char *pSaveGame, CUtlString &levelName ) = 0;
-	virtual void			GetLevelsFromSaveFile( const char *pSaveGame, CUtlVector<CCreateGameServerLoadInfo> &list, bool bWipeDirectoryAndExtract, SaveFileLevelsType_t saveFileLevelsType, void *pUnk ) = 0;
+	virtual void			GetLevelsFromSaveFile( const char *pSaveGame, CUtlVector<CCreateGameServerLoadInfo> &list, bool bWipeDirectoryAndExtract, SaveFileLevelsType_t saveFileLevelsType, CUtlString *pOutHeaderString ) = 0;
 	virtual void			ClearSaveDirectory( void ) = 0;
 	virtual void			PreSaveGameLoaded( const char *pSaveName ) = 0;
-	virtual void			AppendSaveGameResources( CCompressedResourceManifest *pCompressedManifestOut, ILoadingSpawnGroup *pLoadingSpawnGroup, void *pUnk1, void *pUnk2 ) const = 0;
-	virtual void			AppendTransitionResources( CCompressedResourceManifest *pCompressedManifestOut, ILoadingSpawnGroup *pLoadingSpawnGroup, void *pUnk1, void *pUnk2 ) const = 0;
+	// pLoadDesc points to a 48-byte descriptor that is copied by value into the manifest load request.
+	virtual void			AppendSaveGameResources( CCompressedResourceManifest *pCompressedManifestOut, ILoadingSpawnGroup *pLoadingSpawnGroup, SpawnGroupHandle_t hSpawnGroup, const void *pLoadDesc ) const = 0;
+	virtual void			AppendTransitionResources( CCompressedResourceManifest *pCompressedManifestOut, ILoadingSpawnGroup *pLoadingSpawnGroup, SpawnGroupHandle_t hSpawnGroup, const void *pLoadDesc ) const = 0;
 	virtual SaveGameResult_t SaveGame( const SaveGameParams_t &params ) = 0;
 	virtual bool			IsAsyncSaveInProgress( void ) = 0;
 	virtual bool			ProcessPendingSaveRequest( void ) = 0;
 	virtual bool			HasPendingSaveRequest( void ) = 0;
+	virtual void			FinishAsyncSave( void ) = 0;
 
 	virtual const char		*GetEntityUniqueHammerID( CEntityIndex nEntityIndex ) = 0;
 
-	virtual void			*unk_062( const char *pName, const char *pUnk ) = 0;
-	virtual void			*unk_063( const char *pName, const char *pUnk ) = 0;
-	virtual void			*unk_064( const char *pName ) = 0;
-	virtual void			*unk_065( const char *pName ) = 0;
-	virtual void			*unk_066( const char *pName ) = 0;
-	virtual void			*unk_067( const char *pName ) = 0;
+	// Entity subclass (vdata) queries. A scope is one subclass vdata file; the plain variants match it
+	// by its file path, the "ByDataType" ones by its generic_data_type. A NULL or empty scope matches any scope.
+	// Returns the VData class name (e.g. "CCSWeaponBaseVData") bound to a designer or subclass name, or NULL
+	// when the name has no VData class or it belongs to another scope.
+	virtual const char		*GetVDataClassName( const char *pName, const char *pScopeFile ) = 0;
+	virtual const char		*GetVDataClassNameByDataType( const char *pName, const char *pGenericDataType ) = 0;
+	virtual const CUtlVector< CUtlString > &GetSubclassNamesInScope( const char *pScopeFile ) = 0;
+	virtual const CUtlVector< CUtlString > &GetSubclassNamesInScopeByDataType( const char *pGenericDataType ) = 0;
+	virtual void			GetAllSubclassNames( CUtlVector< CUtlString > &names ) = 0;
+	// Returns the designer name of the entity class the subclass is built on.
+	virtual const char		*GetSubclassDesignerName( const char *pSubclassName ) = 0;
 
-	virtual void			UpdateGCInformation( bool bUnk, void *pUnk, const CSteamID *pServerSteamID ) = 0;
+	virtual void			UpdateGCInformation( bool bUnk1, bool bUnk2, const CSteamID *pServerSteamID ) = 0;
 
-	virtual void			*unk_069( const char *pName ) = 0;
-	virtual void			unk_070( void *pUnk1, void *pUnk2 ) = 0;
+	// Sorted designer names of every entity class derived from the C++ class pClassName (e.g. "CCSWeaponBase"),
+	// or the subclass names of a scope when pClassName is that scope's handler type.
+	virtual const CUtlVector< CUtlString > &GetDesignerNamesForClass( const char *pClassName ) = 0;
+	// Forwards to the subclass system's auto-completion callback, which is empty in release builds.
+	virtual void			GetSubclassAutoCompleteList( const void *pUnk, CUtlVector< const char * > &completions ) = 0;
 
 	virtual void			ReportGCQueuedMatchStart( int32 iReservationStage, uint32 *puiConfirmedAccounts, int numConfirmedAccounts ) = 0;
 
-	virtual void			unk_072( void ) = 0;
-	virtual void			*GetDebugOverlayGameSystem( void ) = 0;
+	// Called every host frame; pFrameTimes[ 0 ] is the host frame duration, pFrameTimes[ 1 ] the target frame time.
+	virtual void			OnHostFrameTiming( const double *pFrameTimes ) = 0;
+	// Returns the "Server Tick" scene view debug overlays that CDebugOverlayGameSystem creates through the scene system.
+	virtual ISceneViewDebugOverlays *GetDebugOverlayGameSystem( void ) = 0;
 
 	virtual const char		*GetNativeClassForScriptClass( const char *pScriptClassName ) = 0;
-	virtual void			*GetScriptClassForDesignerName( const char *pDesignerName ) = 0;
+	virtual CEntityClass	*GetScriptClassForDesignerName( const char *pDesignerName ) = 0;
 	virtual bool			IsScriptClassDerivedFrom( const char *pDesignerName, const char *pBaseName ) = 0;
 
 	virtual bool			ShouldHoldGameServerReservation( float flTimeElapsedWithoutClients ) = 0;
 
-	virtual void			unk_078( void ) = 0;
+	// Called when the broadcast relay answers an HLTV broadcast request with HTTP 200.
+	virtual void			OnBroadcastRelayRequestSucceeded( void *pUnk ) = 0;
 	virtual void			SendServerFrameTime( float flFrameTime ) = 0;
 	virtual void			OnClientHltvReplayStart( CPlayerSlot slot, int nUnk ) = 0;
 	virtual void			OnClientHltvReplayStop( CPlayerSlot slot ) = 0;
-	virtual void			DumpEntity( CEntityIndex nEntityIndex, void *pUnk ) = 0;
-	virtual void			*CreateUserCommandsMessage( void ) = 0;
-	virtual bool			unk_084( CPlayerSlot slot, const void *pUnk1, int nUnk2 ) = 0;
+
+	// Called by the VConsole2 flattened serializer view for each network field of an entity. Rewrites the value text of entity and resource handles and appends notes, such as pose parameter names.
+	virtual bool			FormatSerializerFieldValue( CEntityIndex nEntityIndex, FlattenedSerializerSpewField_t &field ) = 0;
+
+	// Snapshots the pending user commands of every player slot; CreateUserCommandsMessage() then
+	// serializes that snapshot into a message (NULL when nothing is pending).
+	virtual void			CaptureUserCommands( void ) = 0;
+	virtual CSVCMsg_UserCommands_t *CreateUserCommandsMessage( void ) = 0;
+
+	// Called for FCVAR_GAMEDLL commands sent by a client. Returns false when the command is not a registered player controller command. 
+	// Otherwise queues it to the controller as a predicted string command event.
+	virtual bool			ProcessClientStringCommand( CPlayerSlot slot, const CCommand &args, uint32 nPredictionSync ) = 0;
 	virtual void			OnPreMatchInterfaceCommand( uint32 uiAccountID, int nUnk, const char *pCommand ) = 0;
 	virtual void			SetPlayerTeammatePreferredColor( uint32 uiAccountID, int nColor ) = 0;
 	virtual void			UpdateCompTeammateColors( void ) = 0;
 
 	virtual ENetworkDisconnectionReason GetGameRulesConnectRejectReason( const CSteamID &steamID ) = 0;
-	virtual const char		*ClientConnectionValidatePreNetChan( const CSteamID &steamID, const void *pUnk ) = 0;
+
+	// Returns the name to use for the connecting account: a generated name cached per account, or pszPlayerName
+	virtual const char		*ClientConnectionValidatePreNetChan( const CSteamID &steamID, const char *pszPlayerName ) = 0;
 
 	virtual bool			LogForHTTPListeners( const char *szLogLine ) = 0;
 
-	virtual void			unk_091( void ) = 0;
-	virtual void			unk_092( void ) = 0;
+	// Only reached through the engine tool service. 
+	// Empty in release builds
 	virtual void			unk_093( void ) = 0;
 	virtual void			unk_094( void ) = 0;
-	virtual void			unk_095( void *pUnk1, int nUnk2, int nUnk3 ) = 0;
+	virtual void			unk_095( void ) = 0;
+	virtual void			unk_096( void ) = 0;
+
+	virtual void			RegisterClientNetMessageHandlers( INetChannel *pNetChannel, CPlayerSlot slot, ClientNetMessageHandlersAction_t eAction ) = 0;
 	virtual bool			GetAddonForMap( const char *pMapName, CUtlString &output ) = 0;
 	virtual uint64			GetMatchID( void ) = 0;
-	virtual void			unk_098( const char *pLogLine ) = 0;
+	virtual void			OnSteamAuthWarning( const char *pszMessage ) = 0;// Receives Steam auth session diagnostics, such as a SteamID mismatch against the auth ticket
+	virtual void			OnNetworkGameServerActivated( INetworkGameServer *pNetworkGameServer ) = 0;
+	virtual uint32			GetSteamGroupAccountID( void ) = 0; // Account ID of the sv_steamgroup group, 0 when none is set
+
+#ifdef _LINUX
+	virtual void			unk_103( void ) = 0;
+#endif
 };
 
 //-----------------------------------------------------------------------------
@@ -878,7 +728,6 @@ public:
 };
 
 typedef IVEngineServer2 IVEngineServer;
-typedef IVEngineClient2 IVEngineClient;
 typedef ISource2Server IServerGameDLL;
 typedef ISource2GameEntities IServerGameEnts;
 typedef ISource2GameClients IServerGameClients;
