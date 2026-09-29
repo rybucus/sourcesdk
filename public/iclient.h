@@ -14,12 +14,23 @@
 #include <engine/IEngineService.h>
 #include <playerslot.h>
 #include <ns_address.h>
+#include <tier0/utlstring.h>
+#include <tier1/utlvector.h>
 
 class INetChannel;
 class CNetworkGameClient;
 class CClientChangelevelState;
 class CGlobalVars;
 class IGameSpawnGroupMgr;
+class ServerClass;
+
+using CGameNetworkableClass = ServerClass;
+
+struct C_ServerClassInfo
+{
+	CUtlString m_ClassName;
+	CGameNetworkableClass *m_pClientClass;
+};
 
 //-----------------------------------------------------------------------------
 // Purpose: Engine-facing client interface. Implemented by CNetworkGameClientBase.
@@ -192,6 +203,13 @@ public:
 // adds no new vtable slots, so it is layout-compatible with the base.
 class CNetworkGameClient : public CNetworkGameClientBase
 {
+public:
+	int GetServerClassCount() const { return m_ServerClasses.Count(); }
+	CGameNetworkableClass *GetClientClass( int nClassID ) const
+	{
+		return nClassID >= 0 && nClassID < m_ServerClasses.Count() ? m_ServerClasses[ nClassID ].m_pClientClass : nullptr;
+	}
+
 private:
 	char pad_0[ 200 ];
 public:
@@ -204,13 +222,19 @@ public:
 	bool m_bAllowClientSidePredict;
 
 private:
-	char pad_2[ 331 ];
+	char pad_2[ 111 ];
+
+public:
+	CUtlVector<C_ServerClassInfo> m_ServerClasses;
+
+private:
+	char pad_3[ 196 ];
 
 public:
 	int32 m_nDeltaTick;
 
 private:
-	char pad_3[ 328 ];
+	char pad_4[ 328 ];
 
 public:
 	int32 m_nClientTick;

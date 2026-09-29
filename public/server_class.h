@@ -44,6 +44,7 @@ public:
 	bool m_Unk4;
 };
 
+using CGameNetworkableClass = ServerClass;
 
 class CBaseNetworkable;
 

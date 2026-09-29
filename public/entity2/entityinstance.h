@@ -32,6 +32,9 @@ struct datamap_t;
 class IScriptVM;
 class CNetworkSerializerClassInfo;
 struct NetworkSharedChangeInfoOverflow_t;
+class ServerClass;
+
+using CGameNetworkableClass = ServerClass;
 
 // See entitynetwork.h
 struct NetworkStateChanged_t;
@@ -169,6 +172,9 @@ public:
 	bool AcceptInput( const char *pszInputName, CEntityInstance *pActivator, CEntityInstance *pCaller, const variant_t &value, const KeyValues3 &params );
 
 	void RemoveSelf();
+
+	CGameNetworkableClass *GetNetworkableClass() const;
+	int GetClassID() const;
 
 	// Attribute keys are case-insensitive. GetIntAttr also reads a float attribute
 	int32 GetIntAttr( const char *pszName ) const;
