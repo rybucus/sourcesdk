@@ -34,23 +34,34 @@ enum PredictionReason_t : int
 struct PredictionSplit_t
 {
 private:
-	uint8 m_nUnknown0000[16];
+	uint8 m_nUnknown0000[24];
 
 public:
+	// CPrediction::RunSimulation reads the controller from +0x18 and the predicted entities from
+	// +0x48 / +0x50 ( count / elements ).
 	CEntityInstance *m_pController;
 
 private:
-	uint8 m_nUnknown0018[40];
+	uint8 m_nUnknown0020[40];
 
 public:
 	CUtlLeanVector< CEntityInstance * > m_PredictedEntities;
 
 private:
-	uint8 m_nUnknown0050[40];
+	uint8 m_nUnknown0058[40];
 
 public:
-	int m_nLastExecutedCommand;
-	int m_nBasePredictedCommand;
+	// Newest command the server acknowledged. CPrediction::ShowPredictionErrors looks up the
+	// predicted frame of this command; predicted frame slot i holds command
+	// m_nLastAcknowledgedCommand + 1 + i.
+	int m_nLastAcknowledgedCommand;
+
+	// Acknowledged command before the last network update ( "%d commands acked (%d->%d)" in
+	// CPrediction::PostNetworkDataReceived ), set to m_nLastAcknowledgedCommand at its end.
+	int m_nPreviousAcknowledgedCommand;
+
+	// Newest predicted command; CPrediction::NetUpdatePreStart re-runs this one, so the state
+	// before it is predicted frame slot m_nLastPredictedCommand - m_nLastAcknowledgedCommand - 2.
 	int m_nLastPredictedCommand;
 };
 
@@ -146,6 +157,9 @@ private:
 
 public:
 	CUtlVector< PredictionSplit_t > m_Splits;
+
+	// gpGlobals backup: CPrediction::Update copies the 0x60 bytes of gpGlobals here on entry and
+	// copies them back before it returns.
 	CGlobalVarsBase m_SavedVars;
 
 private:

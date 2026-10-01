@@ -310,6 +310,63 @@ struct FlattenedSerializerFieldPathCache_t
 
 COMPILE_TIME_ASSERT( sizeof( FlattenedSerializerFieldPathCache_t ) == 40 );
 
+struct FlattenedSerializerField_t;
+
+// Context handed to a field getter; m_pObject is the field owner (m_pValue - m_nFieldOffset).
+struct FlattenedSerializerFieldAccess_t
+{
+	FlattenedSerializerField_t *m_pField;
+	const byte *m_pEncoderParams;
+	byte *m_pObject;
+	byte *m_pValue;
+	int m_nIndex;
+	int m_nEntityIndex;
+};
+
+// Copies the field value into a 128-byte value buffer in the layout the codec encodes.
+struct FlattenedSerializerFieldGetter_t
+{
+	void ( *m_pfnGet )( FlattenedSerializerFieldAccess_t *pAccess, int nUnk, void *pOut );
+	void *m_pUnk;
+};
+
+// pContext is the codec context object every networksystem call site passes (one global, filled by its static init).
+// pWriter / pReader share one bit buffer layout: data, byte count +0x8, bit count +0xC, cursor +0x10, overflow +0x20.
+struct FlattenedSerializerFieldCodec_t
+{
+	bool ( *m_pfnEncode )( void *pContext, void *pWriter, FlattenedSerializerField_t *pField, const byte *pEncoderParams, const void *pValue, int nEntityIndex );
+	bool ( *m_pfnDecode )( void *pContext, void *pReader, FlattenedSerializerField_t *pField, const byte *pEncoderParams, void *pOut, int nEntityIndex );
+};
+
+struct FlattenedSerializerField_t
+{
+	byte m_pad0000[8];
+	const char *m_pszName;
+	byte m_pad0010[16];
+	uint16 m_nFieldOffset; // Offset of the field inside its owner.
+	byte m_pad0022[14];
+	FlattenedSerializerFieldGetter_t *m_pGetters;
+	const FlattenedSerializerFieldCodec_t *m_pCodec;
+	const byte *m_pEncoderParams;
+	byte m_nGetterParams[129]; // Offset into m_pEncoderParams per getter, 0xFF = no params.
+	byte m_nCodecParams; // Offset into m_pEncoderParams for the codec, 0xFF = no params.
+};
+
+COMPILE_TIME_ASSERT( offsetof( FlattenedSerializerField_t, m_nGetterParams ) == 0x48 );
+COMPILE_TIME_ASSERT( offsetof( FlattenedSerializerField_t, m_nCodecParams ) == 0xC9 );
+
+#pragma pack(push, 1)
+// Packed 46-byte entry of CFlattenedSerializer::m_pFields (networksystem walks it with a 0x2E stride).
+struct FlattenedSerializerFieldEntry_t
+{
+	FlattenedSerializerField_t *m_pField;
+	CFlattenedSerializer *m_pChild; // Nested serializer; the entry is a container then and m_pField is not a leaf.
+	byte m_pad0010[30];
+};
+#pragma pack(pop)
+
+COMPILE_TIME_ASSERT( sizeof( FlattenedSerializerFieldEntry_t ) == 46 );
+
 // Size and field offsets are from CFlattenedSerializer allocation/field access.
 class CFlattenedSerializer
 {
@@ -318,7 +375,7 @@ public:
 	CNetworkSerializerClassInfo *m_pClassInfo; // Schema/network serializer source.
 	byte m_pad0010[24];
 	int m_nFieldCount; // Field iteration upper bound
-	FlattenedSerializerPackedField_t **m_ppFields; // Flattened field table.
+	FlattenedSerializerFieldEntry_t *m_pFields; // Flattened field table, m_nFieldCount packed entries.
 	byte m_pad0038[128];
 	CUtlVector< int > m_ExcludedFieldIndices; // Console command net_why_field_excluded reports these toggles.
 	byte m_pad00D0[32];

@@ -81,8 +81,12 @@ public:
 	virtual void unk3() {};
 	virtual int &GetCmdNum() { return m_cmdNum; };
 	virtual void unk5() {};
-	virtual void unk6() {};
-	virtual void unk7() {};
+
+	// Copy m_ButtonStates into / out of the message's buttons_pb. CPrediction::RunSimulation calls
+	// the first on the predicted command and the second on the controller's command context copy.
+	virtual void SyncButtonStatesToProto() {};
+	virtual void SyncButtonStatesFromProto() {};
+
 	virtual void unk8() {};
 	virtual bool DeltaDecode( bf_write &sPacket, CUserCmdBase *pPrev, void *&pMarginController, double flMargin ) { return false; };
 
