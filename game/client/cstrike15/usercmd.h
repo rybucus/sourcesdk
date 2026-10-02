@@ -22,6 +22,30 @@ enum CmdPredictionReason_t : int
 class C_CSGOUserCmd : public CUserCmdBaseHost< CSGOUserCmdPB >
 {
 public:
+	void ButtonsToMessage() override
+	{
+		if ( m_ButtonStates.m_nValue || m_ButtonStates.m_nValueChanged || m_ButtonStates.m_nValueScroll )
+		{
+			CInButtonStatePB *pButtons = MutableBase()->mutable_buttons_pb();
+			pButtons->set_buttonstate1( m_ButtonStates.m_nValue );
+			pButtons->set_buttonstate2( m_ButtonStates.m_nValueChanged );
+			pButtons->set_buttonstate3( m_ButtonStates.m_nValueScroll );
+		}
+		else
+		{
+			MutableBase()->clear_buttons_pb();
+		}
+	}
+
+	void ButtonsFromMessage() override
+	{
+		const CInButtonStatePB &buttons = GetBase().buttons_pb();
+		m_ButtonStates.m_nValue = buttons.buttonstate1();
+		m_ButtonStates.m_nValueChanged = buttons.buttonstate2();
+		m_ButtonStates.m_nValueScroll = buttons.buttonstate3();
+	}
+
+public:
 	CInButtonState m_ButtonStates;
 
 private:
