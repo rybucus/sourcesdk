@@ -107,4 +107,15 @@ public:
 using HMaterialStrong = CStrongHandle< InfoForResourceTypeIMaterial2 >;
 using HMaterialWeak = CWeakHandle< InfoForResourceTypeIMaterial2 >;
 
+class CTextureBase;
+
+class InfoForResourceTypeCTextureBase
+{
+public:
+	using RuntimeClass_t = CTextureBase;
+};
+
+using HTextureStrong = CStrongHandle< InfoForResourceTypeCTextureBase >;
+using HTextureWeak = CWeakHandle< InfoForResourceTypeCTextureBase >;
+
 #endif // IMATERIAL2_H
