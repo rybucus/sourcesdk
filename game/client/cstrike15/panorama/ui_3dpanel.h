@@ -8,6 +8,7 @@
 #include <mathlib/camera.h>
 #include <mathlib/vector.h>
 #include <tier1/refcount.h>
+#include <tier1/utlvector.h>
 #include <entityhandle.h>
 #include <gameeventlistener.h>
 #include <panorama/controls/renderpanel.h>
@@ -68,7 +69,18 @@ private:
 public:
 	Camera_t m_Camera;
 private:
-	uint8 m_pad4C0[ 0x350 ];
+	uint8 m_pad4C0[ 0x318 ];
+public:
+	bool m_bDragRotate;
+	bool m_bDragRotating;
+private:
+	uint8 m_pad7DA[ 0x2 ];
+public:
+	float m_flDragRotateYaw;
+	float m_flDragRotateYawLimit;
+	float m_flDragRotateRadius;
+private:
+	uint8 m_pad7E8[ 0x28 ];
 public:
 	bool m_bStickerApplicationMode;
 	bool m_bKeychainApplicationMode;
@@ -104,5 +116,27 @@ private:
 };
 
 COMPILE_TIME_ASSERT( sizeof( CUI_Item3dPanel ) == 0xAD0 );
+
+struct PreviewCharacter_t
+{
+	CEntityHandle m_hCharacter;
+private:
+	uint8 m_pad004[ 0x9C ];
+};
+
+COMPILE_TIME_ASSERT( sizeof( PreviewCharacter_t ) == 0xA0 );
+
+class CUI_Player3dPanel : public CUI_3dPanel
+{
+private:
+	uint8 m_pad8C0[ 0x2C ];
+public:
+	int32 m_nActiveCharacter;
+	CUtlVector< PreviewCharacter_t > m_Characters;
+private:
+	uint8 m_pad908[ 0x8 ];
+};
+
+COMPILE_TIME_ASSERT( sizeof( CUI_Player3dPanel ) == 0x910 );
 
 #endif
