@@ -7,6 +7,7 @@
 
 #include <mathlib/camera.h>
 #include <mathlib/vector.h>
+#include <mathlib/vector2d.h>
 #include <tier1/refcount.h>
 #include <tier1/utlvector.h>
 #include <entityhandle.h>
@@ -86,7 +87,26 @@ public:
 	bool m_bKeychainApplicationMode;
 	bool m_bApplicationMode;
 private:
-	uint8 m_pad813[ 0x39 ];
+	uint8 m_pad813[ 0x1 ];
+public:
+	Vector2D m_vecApplicationPressCursor;
+	Vector2D m_vecApplicationDragDelta;
+	Vector2D m_vecApplicationStickerOffset;
+	float m_flApplicationTouchTime;
+	bool m_bApplicationDragging;
+	bool m_bApplicationPressHit;
+private:
+	uint8 m_pad832[ 0x2 ];
+public:
+	float m_flApplicationWheelTime;
+	float m_flApplicationStickerRotation;
+private:
+	uint8 m_pad83C[ 0x8 ];
+public:
+	bool m_bApplicationInputReady;
+	bool m_bApplicationWheelReady;
+private:
+	uint8 m_pad846[ 0x6 ];
 public:
 	float m_flFOV;
 	float m_flFOVWeight;
@@ -108,8 +128,10 @@ private:
 public:
 	int32 m_nCreateItem;
 private:
-	uint8 m_pad964[ 0x151 ];
+	uint8 m_pad964[ 0x14C ];
 public:
+	CEntityHandle m_hPreviewPlayer;
+	bool m_bGhostHandsApplied;
 	bool m_bStartWeaponLookAt;
 private:
 	uint8 m_padAB6[ 0x1A ];
