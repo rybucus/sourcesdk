@@ -242,6 +242,15 @@ public:
 	CTransform m_forcedTransform;
 };
 
+class CHitBoxSet
+{
+public:
+	CUtlString m_name;
+	uint32 m_nNameHash;
+	CUtlVector< CHitBox > m_HitBoxes;
+	CUtlString m_SourceFilename;
+};
+
 class CDefaultHitbox : public CHitBox
 {
 public:
