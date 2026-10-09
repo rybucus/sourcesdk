@@ -45,6 +45,17 @@ public:
 		m_ButtonStates.m_nValueScroll = buttons.buttonstate3();
 	}
 
+	int GetAttackHistoryIndex() const
+	{
+		if ( attack1_start_history_index() != -1 )
+			return attack1_start_history_index();
+
+		if ( attack2_start_history_index() != -1 )
+			return attack2_start_history_index();
+
+		return input_history_size() - 1;
+	}
+
 public:
 	CInButtonState m_ButtonStates;
 
