@@ -21,8 +21,8 @@
 #include "tier0/memalloc.h"
 #include "tier0/tslist.h"
 #include "tier0/platform.h"
-#include "tier1/utlvector.h"
-#include "tier1/utlrbtree.h"
+#include "tier0/utlvector.h"
+#include "tier0/utlrbtree.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Optimized pool memory allocator
@@ -59,6 +59,9 @@ public:
 	int Size() const		{ return m_TotalSize; }
 
 	DLL_CLASS_IMPORT bool		IsAllocationWithinPool( void *pMem ) const;
+
+	// Calls pfnCallback( pAllocation, pContext ) for every allocated block, without locking the pool
+	DLL_CLASS_IMPORT void		IterateAllocationsUnsafe( void ( *pfnCallback )( void *pAllocation, void *pContext ), void *pContext );
 
 protected:
 	DLL_CLASS_IMPORT void		ClearDestruct( void (*)( void* ) );
@@ -369,7 +372,7 @@ inline void CUtlMemoryPool<T>::Free(T *pMem)
 template< class T >
 inline void CUtlMemoryPool<T>::Clear()
 {
-	CUtlMemoryPoolBase::ClearDestruct( (void (*)( void* ))&Destruct<T> );
+	CUtlMemoryPoolBase::ClearDestruct( (void (*)( void* ))static_cast< void (*)( T * ) >( &Destruct<T> ) );
 }
 
 

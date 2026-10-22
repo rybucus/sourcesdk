@@ -14,18 +14,22 @@
 #include "tier0/platform.h"
 #include "nav_pathcost.h"
 
+#include "schemacompiler/schemaon.h"
+
 class CCSBot;
 
 //-----------------------------------------------------------------------------
 // Adds danger and damaging-area penalties to the floor cost. Adds no virtuals of its own.
 //-----------------------------------------------------------------------------
-abstract_class PathCost : public CNavPathCost
+schema abstract_class PathCost : public CNavPathCost
 {
 public:
+	TYPEMETA( MGetKV3ClassDefaults; MHasKV3TransferPolymorphicClassname );
+
 	// The bot the cost is computed for; null costs skip the bot-specific penalties.
-	CCSBot *m_me;
+	noschema CCSBot *m_me;
 	// The bot's RouteType; with 2 (SAFEST_ROUTE) the area's danger for the bot's team is added.
-	int m_route;
+	noschema int m_route;
 	float m_dangerFactor;
 	float m_damagingAreasPenaltyCost;
 	float m_flAgentMaxClimb;
@@ -33,7 +37,9 @@ public:
 private:
 	// Begin, end and capacity pointers of 16-byte entries: an area and an extra cost added
 	// whenever the step enters that area.
-	uint8 m_Unk48[ 0x18 ];
+	noschema uint8 m_Unk48[ 0x18 ];
 };
+
+#include "schemacompiler/schemaoff.h"
 
 #endif // CS_NAV_PATHCOST_H

@@ -17,6 +17,8 @@
 #include "nav_area.h"
 #include "nav_ladder.h"
 
+#include "schemacompiler/schemaon.h"
+
 //-----------------------------------------------------------------------------
 // One step from an area to a neighbour: the neighbour, how it is reached (NavTraverseType),
 // through which edge, and the ladder for ladder steps.
@@ -39,9 +41,10 @@ struct PathCostResult_t
 //-----------------------------------------------------------------------------
 // Schema class; the first slots describe it to the schema system.
 //-----------------------------------------------------------------------------
-abstract_class INavPathCost
+schema abstract_class INavPathCost
 {
 public:
+	TYPEMETA( MGetKV3ClassDefaults; MHasKV3TransferPolymorphicClassname );
 	virtual SchemaMetaInfoHandle_t< CSchemaClassInfo > Schema_DynamicBinding() = 0;
 	virtual void Unk_1( void *p ) = 0;
 	virtual void Unk_2( void *p ) = 0;
@@ -63,9 +66,10 @@ public:
 //-----------------------------------------------------------------------------
 // The cost function of the navlib, and the base of the game's own ones.
 //-----------------------------------------------------------------------------
-abstract_class CNavPathCost : public INavPathCost
+schema abstract_class CNavPathCost : public INavPathCost
 {
 public:
+	TYPEMETA( MGetKV3ClassDefaults; MHasKV3TransferPolymorphicClassname );
 	virtual void Unk_9( void *p ) = 0;
 	virtual void Unk_10( void *p ) = 0;
 	virtual void Unk_11( void *p ) = 0;
@@ -103,5 +107,7 @@ public:
 	bool m_bSupportsTransitions;
 	float m_flTransitionPenalty;
 };
+
+#include "schemacompiler/schemaoff.h"
 
 #endif // NAV_PATHCOST_H

@@ -40,7 +40,7 @@ inline constexpr const char *k_pszNetGroupNames[ SG_TOTAL ] =
 class CNetMessage
 {
 public:
-	CNetMessage( NetChannelBufType_t bufType = BUF_DEFAULT ) : m_dbRecivedTime( -1.0 ), m_nSignatrue( 0 ), m_bufType( bufType ), m_nPacketSize( -1 ), m_nSendCount( -1 ), m_flMargin( -1.0f ), m_nUnk( -1 ) {}
+	CNetMessage( NetChannelBufType_t bufType = BUF_DEFAULT ) : m_dbRecivedTime( -1.0 ), m_nTick( 0 ), m_bufType( bufType ), m_nBits( -1 ), m_nInSequenceNr( -1 ), m_flMargin( -1.0f ), m_nUnk( -1 ) {}
 	CNetMessage( const CNetMessage &copyFrom ) = default;
 	CNetMessage( CNetMessage &&moveFrom ) = default;
 	CNetMessage &operator=( const CNetMessage &copyFrom ) = default;
@@ -62,10 +62,10 @@ public:
 	template< typename T > const T *As() const { return static_cast< const T * >( this ); }
 
 	double GetRecivedTime() const { return m_dbRecivedTime; }
-	uint32 GetSignature() const { return m_nSignatrue; }
+	int GetTick() const { return m_nTick; }
 	NetChannelBufType_t GetBufType() const { return m_bufType; }
-	int GetPacketSize() const { return m_nPacketSize; }
-	int GetSendCount() const { return m_nSendCount; }
+	int GetBits() const { return m_nBits; }
+	int GetInSequenceNr() const { return m_nInSequenceNr; }
 	float GetMargin() const { return m_flMargin; }
 
 	bool Send( CPlayerSlot slot ) const;
@@ -75,10 +75,10 @@ public:
 
 private:
 	double m_dbRecivedTime;
-	uint32 m_nSignatrue;
+	int m_nTick;
 	NetChannelBufType_t m_bufType;
-	int m_nPacketSize;
-	int m_nSendCount;
+	int m_nBits;
+	int m_nInSequenceNr;
 	float m_flMargin;
 	int64 m_nUnk;
 };
@@ -124,7 +124,7 @@ public:
 			return s_szResult.c_str();
 		}
 
-		virtual int GetSize() const { return sizeof( PBType_t ); }
+		virtual int GetSize() const { return sizeof( MyType_t ); }
 
 		virtual const char *ToString( CNetMessage *pData, CUtlString &sResult ) const
 		{

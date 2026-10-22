@@ -5,15 +5,18 @@
 #pragma once
 #endif
 
-#include "tier1/utlleanvector.h"
-#include "tier1/utlmap.h"
-#include "tier1/utlvector.h"
+#include "tier0/utlleanvector.h"
+#include "tier0/utlmap.h"
+#include "tier0/utlvector.h"
 #include "tier0/threadtools.h"
+#include "kv3lib/kv3transfer_constants.h"
 #include "entityidentity.h"
 #include "entitytypes.h"
 #include "ientitylistener.h"
 
 #include "spawngrouptypes.h"
+
+#include "schemacompiler/schemaon.h"
 
 class ServerClass;
 class ClientClass;
@@ -21,8 +24,10 @@ class CNetworkTransmitComponent;
 class CChangeInfoAccessor;
 class CEntityInstancePolymorphicMetadataHelper;
 
-struct ChangeAccessorFieldPathIndex_t
+schema struct ChangeAccessorFieldPathIndex_t
 {
+	DECLARE_SCHEMA_DATA_CLASS( ChangeAccessorFieldPathIndex_t );
+
 	ChangeAccessorFieldPathIndex_t() { m_Value = -1; }
 	ChangeAccessorFieldPathIndex_t( int32 value ) { m_Value = value; }
 
@@ -31,20 +36,22 @@ struct ChangeAccessorFieldPathIndex_t
 	int32 m_Value;
 };
 
-class CNetworkVarChainer : public CEntityOwnerPtr
+schema class CNetworkVarChainer : public CEntityOwnerPtr
 {
 public:
+	DECLARE_SCHEMA_DATA_CLASS( CNetworkVarChainer );
+
 	struct ChainUpdatePropagationLL_t
 	{
 		ChainUpdatePropagationLL_t *pNext;
 		CUtlDelegate< void( const CNetworkVarChainer & ) > updateDelegate;
 	};
 
-	CUtlVector< ChainUpdatePropagationLL_t > m_PropagationChain;
+	noschema CUtlVector< ChainUpdatePropagationLL_t > m_PropagationChain;
 	ChangeAccessorFieldPathIndex_t m_PathIndex;
 
 	// When false, NetworkStateChanged calls are no-ops
-	bool m_bNetworkingEnabled;
+	noschema bool m_bNetworkingEnabled;
 };
 
 struct NetworkStateChanged_t
@@ -211,17 +218,18 @@ public:
 };
 
 // The network state of an entity
-class CNetworkTransmitComponent : public IEventRegisterCallback
+schema class CNetworkTransmitComponent : public IEventRegisterCallback
 {
 public:
+	TYPEMETA( MGetKV3ClassDefaults; MHasKV3TransferPolymorphicClassname );
+
 	// Turns a pending state change into a full change
 	void FireEvent() override = 0;
 
 	// TODO(@Wend4r): Implement schemacompiler2 & kv3lib stuff
 	virtual SchemaMetaInfoHandle_t< CSchemaClassInfo > Schema_DynamicBinding() = 0;
 	// Save and load the only schema fields
-	virtual void KV3TransferSave( CKV3TransferSaveContext *pContext ) const = 0;
-	virtual void KV3TransferLoad( CKV3TransferLoadContext *pContext ) = 0;
+	CLASS_USES_KV3TRANSFER_VIRTUAL( CNetworkTransmitComponent );
 
 	virtual const char *GetClassName() const = 0;
 
@@ -230,53 +238,53 @@ public:
 
 public:
 	// Allocated on first use; owns the path lookup caches
-	NetworkSharedChangeInfoOverflow_t *m_pSharedChangeInfoOverflow;
+	noschema NetworkSharedChangeInfoOverflow_t *m_pSharedChangeInfoOverflow;
 
 	// While it holds changes, state changes are only marked pending
-	void *m_pNetworkStateChangedRouter;
+	noschema void *m_pNetworkStateChangedRouter;
 
-	uint32 m_nNetworkStateChangedRouterData; // 0 at construction
-	uint32 m_nUnk024; // 0 at construction
-	uint64 m_nUnk020; // 0 at construction
+	noschema uint32 m_nNetworkStateChangedRouterData; // 0 at construction
+	noschema uint32 m_nUnk024; // 0 at construction
+	noschema uint64 m_nUnk020; // 0 at construction
 
 	// Not set by the constructor
-	uint8 m_pad028[0x100];
+	noschema uint8 m_pad028[0x100];
 
-	CThreadRWLock_FastRead m_StateChangeLock;
+	noschema CThreadRWLock_FastRead m_StateChangeLock;
 
 	// Where the lock is smaller
-	uint8 m_padAfterLock[24];
+	noschema uint8 m_padAfterLock[24];
 
 	// 0 at construction
-	NetworkStateChangeFlags_t m_eStateChangeFlags;
+	noschema NetworkStateChangeFlags_t m_eStateChangeFlags;
 
 	// The only schema field
 	uint8 m_nTransmitStateOwnedCounter;
 
 	// A state change arrived while the router held pending changes
-	bool m_bPendingStateChange;
+	noschema bool m_bPendingStateChange;
 
-	uint8 m_pad2DE[2];
+	noschema uint8 m_pad2DE[2];
 
-	bool m_bNetworkUpdatesDisabled;
+	noschema bool m_bNetworkUpdatesDisabled;
 
 	// Most offsets one shared change info record holds
-	int32 m_nMaxChangedOffsets;
+	noschema int32 m_nMaxChangedOffsets;
 
-	Entity2Networkable_t *m_pNetworkable;
+	noschema Entity2Networkable_t *m_pNetworkable;
 
-	int32 m_nUnk2F0; // -1 at construction
-	uint16 m_nSharedChangeInfoIndex;
-	uint16 m_nSharedChangeInfoSerial; // Serial paired with m_nSharedChangeInfoIndex
-	uint32 m_nUnk2F8; // 0 at construction
+	noschema int32 m_nUnk2F0; // -1 at construction
+	noschema uint16 m_nSharedChangeInfoIndex;
+	noschema uint16 m_nSharedChangeInfoSerial; // Serial paired with m_nSharedChangeInfoIndex
+	noschema uint32 m_nUnk2F8; // 0 at construction
 
 	// Never locked by the server
-	CAtomicMutex m_UnkMutex300;
-	CAtomicMutex m_UnkMutex310;
+	noschema CAtomicMutex m_UnkMutex300;
+	noschema CAtomicMutex m_UnkMutex310;
 
 	// Built on demand and rebuilt while marked dirty
-	CEntityInstancePolymorphicMetadataHelper *m_pPolymorphicMetadataHelper;
-	bool m_bPolymorphicMetadataDirty; // True at construction
+	noschema CEntityInstancePolymorphicMetadataHelper *m_pPolymorphicMetadataHelper;
+	noschema bool m_bPolymorphicMetadataDirty; // True at construction
 };
 
 class IEntity2Networkables
@@ -299,5 +307,7 @@ public:
 	CUtlMap< int, Entity2Networkable_t > m_NetworkedEntities2;
 };
 COMPILE_TIME_ASSERT( sizeof( CEntity2NetworkClasses ) == 72 );
+
+#include "schemacompiler/schemaoff.h"
 
 #endif // ENTITYNETWORK_H

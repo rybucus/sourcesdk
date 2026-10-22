@@ -42,6 +42,7 @@
 
 #include "platform.h"
 #include <stddef.h>
+#include <limits>
 #ifdef _LINUX
 #ifndef offsetof
 #ifdef GNUC
@@ -194,7 +195,7 @@ public:
 	virtual void CompactOnFail() = 0;
 
 	// Logs the out of memory message, breaks in the debugger and exits the process
-	virtual void ReportFailedAllocation( int nSize ) = 0;
+	virtual void ReportFailedAllocation( size_t nSize ) = 0;
 
 	// memset's at the pMem location with nSize bytes of specified type, where:
 	// MemoryDebugType_None - would do nothing;
@@ -244,11 +245,11 @@ public:
 	// Returns true if stackstats is enabled for this allocator
 	virtual bool IsStackStatsEnabled() = 0;
 
-	// AMNOTE: Stub, returns 0
-	virtual int unk101() = 0;
+	// Stub in the standard allocators, returns 0
+	virtual MemAllocAttribute_t GetAllocAttributes( void *pMem ) = 0;
 
-	// AMNOTE: Stub
-	virtual void unk102( void *pMem, MemAllocAttribute_t alloc_attribute, int unk ) = 0;
+	// Stub in the standard allocators
+	virtual void SetAllocAttributes( void *pMem, MemAllocAttribute_t alloc_attribute, int unk ) = 0;
 
 	// AMNOTE: Copies data to an unknown struct of byte size 56
 	// Returns true if data was written, false otherwise
@@ -278,6 +279,28 @@ PLATFORM_INTERFACE IMemAlloc* g_pMemAllocInternalPS3;
 MEM_INTERFACE IMemAlloc* g_pMemAlloc;
 
 #endif
+
+// Plain functions over g_pMemAlloc, for libraries that take allocator callbacks
+MEM_INTERFACE void *MemAlloc_AllocFunc( size_t nSize );
+MEM_INTERFACE void *MemAlloc_CallocFunc( size_t nCount, size_t nSize );
+MEM_INTERFACE void *MemAlloc_ReallocFunc( void *pMem, size_t nSize );
+MEM_INTERFACE void MemAlloc_FreeFunc( void *pMem );
+MEM_INTERFACE void *MemAlloc_AllocAlignedFunc( size_t nSize, size_t align );
+MEM_INTERFACE void MemAlloc_FreeAlignedFunc( void *pMem );
+MEM_INTERFACE size_t MemAlloc_GetSizeFunc( void *pMem );
+MEM_INTERFACE MemAllocAttribute_t MemAlloc_GetAllocAttributesFunc( void *pMem );
+MEM_INTERFACE void MemAlloc_SetAllocAttributesFunc( void *pMem, MemAllocAttribute_t alloc_attribute, int unk );
+
+// Copies of the string in memory from g_pMemAlloc, null for a null string
+MEM_INTERFACE char *MemAlloc_StrDupFunc( const char *pString );
+MEM_INTERFACE char *MemAlloc_StrDupWrapperFunc( const char *pString );
+MEM_INTERFACE wchar_t *MemAlloc_WcStrDupFunc( const wchar_t *pString );
+
+// The allocator callbacks tier0 hands to Qt: MemAlloc_AllocFunc, MemAlloc_FreeFunc and MemAlloc_ReallocFunc
+typedef void *( *QAlloc_t )( size_t nSize );
+typedef void ( *QFree_t )( void *pMem );
+typedef void *( *QRealloc_t )( void *pMem, size_t nSize );
+MEM_INTERFACE void Qt_GetCustomAllocators( QAlloc_t *pAlloc, QFree_t *pFree, QRealloc_t *pRealloc );
 
 //-----------------------------------------------------------------------------
 
@@ -474,7 +497,9 @@ public:
 		size_t nSize = nCount * sizeof( T );
 		size_t nMemSize = GetSize( pMem );
 
-		return ( I )( ( ( nMemSize > nSize ) ? nMemSize : nSize ) / sizeof( T ) );
+		size_t nCountMax = ( size_t )( std::numeric_limits< I >::max )();
+		size_t nAdjustedCount = ( ( nMemSize > nSize ) ? nMemSize : nSize ) / sizeof( T );
+		return ( I )( ( nAdjustedCount < nCountMax ) ? nAdjustedCount : nCountMax );
 	}
 };
 

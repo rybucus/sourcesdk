@@ -33,7 +33,13 @@ BEGIN_SCRIPTDESC_ROOT_NAMED( CEntityInstance, "CEntityInstance", "CEntityInstanc
 	DEFINE_SCRIPTFUNC_NAMED( ScriptGetOrCreatePrivateScriptScope, "GetOrCreatePrivateScriptScope", "Retrieve, creating if necessary, the private per-instance script-side data associated with an entity" )
 END_SCRIPTDESC()
 
-// Follows the game's CEntityInstance; steps without an SDK interface are marked with "Game:"
+void CEntityInstance::KV3TransferSave( CKV3TransferSaveContext *pContext ) const
+{
+}
+
+void CEntityInstance::KV3TransferLoad( CKV3TransferLoadContext *pContext )
+{
+}
 
 void CEntityInstance::ReleasePublicScriptScope()
 {
@@ -511,7 +517,7 @@ void CEntityInstance::ConnectOutputToScript( const char *pszOutputName, const ch
 
 	// TODO(@Wend4r): Implement kv3lib stuff.
 	if ( *pszValueOverride )
-		pConnection->m_paramMap.m_KV3.FindOrCreateMember( "--old-connection-literal--" )->FindOrCreateMember( "value" )->SetString( pszValueOverride );
+		pConnection->m_paramMap.m_KV3[ "--old-connection-literal--" ][ "value" ] = pszValueOverride;
 
 	outputs[ 0 ]->AddConnection( pConnection );
 }

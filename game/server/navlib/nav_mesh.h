@@ -15,11 +15,13 @@
 #include "tier0/utlstring.h"
 #include "mathlib/vector.h"
 #include "mathlib/mathlib.h"
-#include "tier1/utlvector.h"
-#include "tier1/utlleanvector.h"
-#include "tier1/utlhashtable.h"
+#include "tier0/utlvector.h"
+#include "tier0/utlleanvector.h"
+#include "tier0/utlhashtable.h"
 #include "nav_area.h"
 #include "nav_ladder.h"
+
+#include "schemacompiler/schemaon.h"
 
 class CUtlBuffer;
 class KeyValues3;
@@ -95,23 +97,26 @@ public:
 //-----------------------------------------------------------------------------
 // Schema class: the agent of one nav hull, as scripts/nav_hulls.vdata defines it.
 //-----------------------------------------------------------------------------
-struct CNavHullVData
+schema struct CNavHullVData
 {
-	bool m_bAgentEnabled;
-	float m_agentRadius;
-	float m_agentHeight;
-	bool m_agentShortHeightEnabled;
-	float m_agentShortHeight;
-	bool m_agentCrawlEnabled;
-	float m_agentCrawlHeight;
-	float m_agentMaxClimb;
-	int m_agentMaxSlope;
-	float m_agentMaxJumpDownDist;
-	float m_agentMaxJumpHorizDistBase;
-	float m_agentMaxJumpUpDist;
-	float m_agentBorderErosion;
-	bool m_flowMapGenerationEnabled;
-	float m_flowMapNodeMaxRadius;
+	TYPEMETA( MVDataRoot; MGetKV3ClassDefaults );
+	DECLARE_SCHEMA_DATA_CLASS( CNavHullVData );
+
+	bool m_bAgentEnabled; META( MPropertyFriendlyName = "Enabled"; MPropertyDescription = "Is this agent enabled for generation? ( will result in 0 nav areas for this agent if not )." );
+	float m_agentRadius; META( MPropertyFriendlyName = "Radius"; MPropertyDescription = "Radius of navigating agent capsule." );
+	float m_agentHeight; META( MPropertyFriendlyName = "Height"; MPropertyDescription = "Height of navigating agent capsule." );
+	bool m_agentShortHeightEnabled; META( MPropertyFriendlyName = "Enable Crouch Height"; MPropertyDescription = "Enable shorter navigating agent capsules ( crouch ) in addition to regular height capsules." );
+	float m_agentShortHeight; META( MPropertyFriendlyName = "Crouch height"; MPropertyDescription = "Crouch height of navigating agent capsules if enabled." );
+	bool m_agentCrawlEnabled; META( MPropertyFriendlyName = "Enable Crawl Height"; MPropertyDescription = "Enable even shorter navigating agent capsules ( crawl ) in addition to regular height capsules." );
+	float m_agentCrawlHeight; META( MPropertyFriendlyName = "Crawl height"; MPropertyDescription = "Crawl height of navigating agent capsules if enabled." );
+	float m_agentMaxClimb; META( MPropertyFriendlyName = "Max Climb"; MPropertyDescription = "Max vertical offset that the agent simply ignores and walks over." );
+	int m_agentMaxSlope; META( MPropertyFriendlyName = "Max Slope"; MPropertyDescription = "Max ground slope to be considered walkable." );
+	float m_agentMaxJumpDownDist; META( MPropertyFriendlyName = "Max Jump Down Distance"; MPropertyDescription = "Max vertical offset at which to create a jump connection ( possibly one-way )." );
+	float m_agentMaxJumpHorizDistBase; META( MPropertyFriendlyName = "Max Horizontal Jump Distance"; MPropertyDescription = "Max horizontal offset over which to create a jump connection ( actually a parameter into the true threshold function )." );
+	float m_agentMaxJumpUpDist; META( MPropertyFriendlyName = "Max Jump Up Distance"; MPropertyDescription = "Max vertical offset at which to make a jump connection two-way." );
+	int m_agentBorderErosion; META( MPropertyFriendlyName = "Border Erosion"; MPropertyDescription = "Border erosion in voxel units ( -1 to use default value based on agent radius )." );
+	bool m_flowMapGenerationEnabled; META( MPropertyFriendlyName = "Hierarchical Nav"; MPropertyDescription = "Enables super node nav information to be generated" );
+	float m_flowMapNodeMaxRadius; META( MPropertyFriendlyName = "Hierarchical Nav Max Super Node radius"; MPropertyDescription = "Maximum radius of a super node - larger means lower resolution" );
 };
 
 //-----------------------------------------------------------------------------
@@ -348,5 +353,7 @@ public:
 	// Loaded from scripts/nav_hulls.vdata; null when that file is missing.
 	CNavHullVDataFileManager *m_pHullVDataFileManager;
 };
+
+#include "schemacompiler/schemaoff.h"
 
 #endif // NAV_MESH_H

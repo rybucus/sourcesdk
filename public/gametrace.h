@@ -16,8 +16,10 @@
 #include "entity2/entityinstance.h"
 #include "mathlib/transform.h"
 #include "tier0/utlstring.h"
-#include "tier1/generichash.h"
-#include "tier1/utlvector.h"
+#include "tier0/generichash.h"
+#include "tier0/utlvector.h"
+
+#include "schemacompiler/schemaon.h"
 
 class IPhysicsBody;
 class IPhysicsShape;
@@ -82,7 +84,7 @@ enum RnQueryObjectSet
 	RNQUERY_OBJECTS_ALL               = RNQUERY_OBJECTS_STATIC | RNQUERY_OBJECTS_ALL_GAME_ENTITIES,
 };
 
-enum HitGroup_t
+schema enum HitGroup_t
 {
 	HITGROUP_INVALID = -1,
 	HITGROUP_GENERIC = 0,
@@ -118,9 +120,6 @@ public:
 		m_thickness = 0.1f;
 		m_softContactFrequency = 0.0f;
 		m_softContactDampingRatio = 0.0f;
-		m_wheelDrag = 0.0f;
-		m_heatConductivity = 0.0f;
-		m_flashpoint = 0.0f;
 	}
 	
 public:
@@ -130,9 +129,22 @@ public:
 	float m_thickness;
 	float m_softContactFrequency;
 	float m_softContactDampingRatio;
-	float m_wheelDrag;
-	float m_heatConductivity;
-	float m_flashpoint;
+};
+
+schema class CPhysSurfacePropertiesVehicle
+{
+public:
+	TYPEMETA( MGetKV3ClassDefaults );
+
+	CPhysSurfacePropertiesVehicle()
+	{
+		m_wheelDrag = 0.0f;
+		m_wheelFrictionScale = 1.0f;
+	}
+
+public:
+	float m_wheelDrag; META( MKV3TransferName = "wheeldrag" );
+	float m_wheelFrictionScale; META( MKV3TransferName = "wheelfrictionscale" );
 };
 
 class CPhysSurfacePropertiesSoundNames
@@ -157,6 +169,7 @@ public:
 	CUtlString m_meleeImpact;
 	CUtlString m_pushOff;
 	CUtlString m_skidStop;
+	CUtlString m_resonant;
 };
 
 class CPhysSurfacePropertiesAudio
@@ -202,6 +215,7 @@ public:
 	bool m_bHidden;
 	CUtlString m_description;
 	CPhysSurfacePropertiesPhysics m_physics;
+	CPhysSurfacePropertiesVehicle m_vehicleParams;
 	CPhysSurfacePropertiesSoundNames m_audioSounds;
 	CPhysSurfacePropertiesAudio m_audioParams;
 };
@@ -555,5 +569,8 @@ public:
 	// against the culled volume exclusively.
 	virtual bool CanTraceRay( const Ray_t &ray ) = 0;
 };
+
+#include "schemacompiler/schemaoff.h"
+
 #endif // GAMETRACE_H
 

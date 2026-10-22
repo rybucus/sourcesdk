@@ -12,9 +12,9 @@
 #include "resourcefile/igameresourcemanifestloadcompletion.h"
 #include "tier0/threadtools.h"
 #include "tier0/utlstring.h"
-#include "tier1/convar.h"
-#include "tier1/utlmap.h"
-#include "tier1/utlvector.h"
+#include "tier0/convar.h"
+#include "tier0/utlmap.h"
+#include "tier0/utlvector.h"
 #include "worldrenderer/icomputeworldorigin.h"
 
 abstract_class IGameSpawnGroupMgr
@@ -33,18 +33,16 @@ public:
 	virtual int GetChildSpawnGroupCount(SpawnGroupHandle_t handle) = 0;
 	virtual SaveRestoreDataHandle_t SaveGame_Start(const char *pSaveName, const char *pOldLevel, const char *pszLandmarkName) = 0;
 	virtual bool SaveGame_Finalize(SaveRestoreDataHandle_t hSaveRestore) = 0;
-	virtual bool SaveGame_AppendSpawnGroups(SaveRestoreDataHandle_t hSaveRestore) = 0;
+	virtual bool StreamEntitiesToFile(SaveRestoreDataHandle_t hSaveRestore) = 0;
 	virtual const char *SaveGame_GetLastSaveFile() = 0;
 	virtual bool IsGameReadyToSave() = 0;
 	virtual void DumpSpawnGroups() = 0;
-	virtual unsigned int GetSaveRestoreLogChannel() = 0;
+	virtual LoggingChannelID_t GetSaveRestoreLogChannel() = 0;
 	virtual CUtlString GetSaveRestoreContextString() const = 0;
-	virtual void DispatchActiveSpawnGroupChanged(SpawnGroupHandle_t hSpawnGroup) = 0;
-	virtual void DispatchClientPostDataUpdate(int nCount) = 0;
+	// AMNOTE: Dispatch the IGameSystem WorldGroupCreated and WorldGroupDestroyed events
+	virtual void OnWorldGroupCreated(WorldGroupId_t hWorldGroup) = 0;
+	virtual void OnWorldGroupDestroyed(WorldGroupId_t hWorldGroup) = 0;
 	virtual CUtlString GetName() const = 0;
-	virtual void OnSpawnGroupManagerReady() = 0;
-
-	virtual ~IGameSpawnGroupMgr() {}
 };
 
 // AMNOTE: Short stubs representing game class hierarchy
