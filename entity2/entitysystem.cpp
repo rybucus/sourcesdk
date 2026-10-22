@@ -6,10 +6,11 @@
 
 CGameEntitySystem *GameEntitySystem()
 {
-	if ( !g_pGameResourceServiceServer )
+	IGameResourceService *pService = g_pGameResourceServiceServer ? g_pGameResourceServiceServer : g_pGameResourceServiceClient;
+	if ( !pService )
 		return nullptr;
 
-	return static_cast< CGameResourceService * >( g_pGameResourceServiceServer )->m_pEntitySystem;
+	return static_cast< CGameResourceService * >( pService )->m_pEntitySystem;
 }
 
 CEntityIdentity* CEntitySystem::GetEntityIdentity(CEntityIndex entnum)
