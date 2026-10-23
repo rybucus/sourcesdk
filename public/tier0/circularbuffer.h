@@ -87,6 +87,8 @@ public:
 
 	I GetReadAvailable() const { return m_nCount; }
 	I GetWriteAvailable() const { return ELEMENT_COUNT - m_nCount; }
+	I GetIndex() const { return m_nIndex; }
+	const T &Element( I nSlot ) const { return m_Data[nSlot]; }
 
 	// Peeks and reads from the buffer but not consumes from it.
 	// Offset could be used to iterate the available for read entries in the buffer.
