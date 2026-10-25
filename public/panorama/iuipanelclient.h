@@ -6,9 +6,11 @@
 #endif
 
 #include <mathlib/vector.h>
+#include <tier0/basetypes.h>
 #include <tier0/platform.h>
 #include <tier1/utlvector.h>
 #include <panorama/panoramasymbol.h>
+#include <panorama/panoramatypes.h>
 
 namespace panorama
 {
@@ -16,6 +18,7 @@ namespace panorama
 class CPanel2D;
 class IUIPanel;
 class IUIScrollBar;
+struct CPanel2DClassInfo;
 struct GamePadData_t;
 struct KeyData_t;
 struct MouseData_t;
@@ -27,13 +30,22 @@ struct ParsedPanelProperty_t
 	const char *m_pchValue;
 };
 
+struct GestureData_t
+{
+	float m_flX;
+	float m_flY;
+	int m_nPhase;
+	float m_flRotation;
+	float m_flScale;
+};
+
 class IUIPanelClient
 {
 public:
 	virtual IUIPanel *UIPanel() const = 0;
 	virtual void OnDeletePanel() = 0;
 	virtual CPanoramaSymbol GetPanelType() const = 0;
-	virtual bool unk003( CPanoramaSymbol symPanelType ) const = 0;
+	virtual bool IsPanelType( CPanoramaSymbol symPanelType ) const = 0;
 	virtual void Paint() = 0;
 	virtual void PaintArea( const PanoramaRect_t &rectPaintArea ) = 0;
 	virtual void StoppedPainting() = 0;
@@ -51,24 +63,24 @@ public:
 	virtual bool OnMouseButtonTripleClick( const MouseData_t &code ) = 0;
 	virtual bool OnMouseWheel( const MouseData_t &code ) = 0;
 	virtual void OnMouseMove( float flMouseX, float flMouseY ) = 0;
+	virtual bool BDragInProgress() const = 0;
+	virtual bool BRequiresFocus() const = 0;
 	virtual bool OnClick( IUIPanel *pPanel, const MouseData_t &code ) = 0;
-	virtual bool unk022() const = 0;
-	virtual void OnRemoveChild( IUIPanel *pChild ) = 0;
-	virtual bool unk024() = 0;
-	virtual bool BIsDelayedProperty( CPanoramaSymbol symProperty ) = 0;
+	virtual bool OnGesture( float flMouseX, float flMouseY, const GestureData_t &gesture ) = 0;
+	virtual bool BIsClientPanelEvent( CPanoramaSymbol symProperty ) = 0;
 	virtual bool BSetProperties( const CUtlVector< ParsedPanelProperty_t > &vecProperties ) = 0;
-	virtual bool BSetProperty( CPanoramaSymbol symName, const char *pchValue ) = 0;
-	virtual void unk028() = 0;
-	virtual void unk029() = 0;
-	virtual void unk030() = 0;
-	virtual void unk031() = 0;
-	virtual void unk032() = 0;
-	virtual void unk033() = 0;
-	virtual void unk034() = 0;
-	virtual bool unk035() = 0;
+	virtual bool BSetProperty( ParsedPanelProperty_t property ) = 0;
+	virtual void OnBeforeChildrenChanged() = 0;
+	virtual void OnRemoveChild( IUIPanel *pChild ) = 0;
+	virtual void OnAfterChildrenChanged() = 0;
+	virtual void OnInitializedFromLayout() = 0;
+	virtual void OnStylesChanged() = 0;
+	virtual void OnChildStylesChanged() = 0;
+	virtual void OnVisibilityChanged() = 0;
+	virtual bool OnSetFocusToNextPanel( int nRepeats, EFocusMoveDirection moveType, bool bAllowWrap, float flTabIndexCurrent, float flXPosCurrent, float flYPosCurrent, float flXStart, float flYStart ) = 0;
 	virtual bool BRequiresContentClipLayer() = 0;
-	virtual void unk037() = 0;
-	virtual void *unk038() = 0;
+	virtual void OnCallBeforeStyleAndLayout() = 0;
+	virtual int GetMouseCursor() = 0;
 	virtual void OnUIScaleFactorChanged( const Vector &vOldScaleFactor, const Vector &vNewScaleFactor ) = 0;
 	virtual void SetupJavascriptObjectTemplate() = 0;
 	virtual IUIScrollBar *CreateNewVerticalScrollBar( float flInitialScrollPos ) = 0;
@@ -84,18 +96,15 @@ public:
 	virtual bool BCustomScrollInProgress() = 0;
 	virtual void OnLayoutReloading() = 0;
 	virtual void OnLayoutReloaded() = 0;
-	virtual void unk054() = 0;
-	virtual void unk055() = 0;
-	virtual void unk056() = 0;
-	virtual void unk057() = 0;
-	virtual void *unk058() = 0;
-	virtual void unk059() = 0;
-	virtual void *unk060() = 0;
-	virtual const CPanoramaSymbol *unk061() const = 0;
+	virtual void OnStyleFileReloaded() = 0;
+	virtual void OnReadyForDisplay() = 0;
+	virtual void OnUnreadyForDisplay() = 0;
+	virtual void OnDeferredUpdate() = 0;
+	virtual const char *GetDebugDescription() = 0;
+	virtual void OnParentWindowChanged() = 0;
+	virtual SoundEventGuid_t PlayPanelSound( const char *pchSound ) = 0;
+	virtual const CPanel2DClassInfo *GetPanelClassInfo() const = 0;
 	virtual ~IUIPanelClient() {}
-	virtual bool GetContextUIBounds( float *pflX, float *pflY, float *pflWidth, float *pflHeight ) = 0;
-	virtual void *unk064() = 0;
-	virtual void *unk065() = 0;
 };
 
 } // namespace panorama

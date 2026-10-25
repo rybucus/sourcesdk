@@ -20,10 +20,13 @@ class CJSKeyframesObject;
 class CLocVariableValue;
 class IUIPanelClient;
 class IUIPanelStyle;
+class IUIRenderDevice;
+class IUIRenderEngine;
 class IUIScrollBar;
 class IUIWindow;
 struct CascadeStyleFileInfo_t;
 struct DebugPropertyOutput_t;
+struct ParsedPanelProperty_t;
 
 enum EAnimationDirection : uint8;
 enum EAnimationFillMode : uint8;
@@ -50,7 +53,7 @@ public:
 	virtual void SetID( const char *pchID ) = 0;
 	virtual const char *GetID() const = 0;
 	virtual CPanoramaSymbol GetPanelType() const = 0;
-	virtual bool unk012( CPanoramaSymbol symPanelType ) const = 0;
+	virtual bool IsPanelType( CPanoramaSymbol symPanelType ) const = 0;
 	virtual bool BHasID() const = 0;
 	virtual bool BLoadLayout( const char *pchFile, bool bOverrideExisting = false, bool bPartialLayout = false ) = 0;
 	virtual void RequireLoadLayout( const char *pchFile, bool bOverrideExisting = false, bool bPartialLayout = false ) = 0;
@@ -229,7 +232,7 @@ public:
 	virtual void *unk188() = 0;
 	virtual bool IsInspected() const = 0;
 	virtual bool BHasHoverStyle() const = 0;
-	virtual void *unk191() = 0;
+	virtual void SetSelected( bool bSelected ) = 0;
 	virtual bool IsSelected() const = 0;
 	virtual bool BHasKeyFocus() const = 0;
 	virtual bool BHasDescendantKeyFocus() const = 0;
@@ -269,8 +272,8 @@ public:
 	virtual void *unk228() = 0;
 	virtual void *unk229() = 0;
 	virtual void *unk230() = 0;
-	virtual void *unk231() = 0;
-	virtual void *unk232() = 0;
+	virtual IUIRenderEngine *UIRenderEngine() = 0;
+	virtual IUIRenderDevice *UIRenderDevice() = 0;
 	virtual void *unk233() = 0;
 	virtual void *unk234() = 0;
 	virtual void *unk235() = 0;
@@ -352,9 +355,9 @@ public:
 	virtual IUIPanel *GetJavaScriptContextParent() const = 0;
 	virtual void *unk312() = 0;
 	virtual void *unk313() = 0;
-	virtual bool BSetProperty( CPanoramaSymbol symName, const char *pchValue ) = 0;
+	virtual bool BSetProperty( ParsedPanelProperty_t property ) = 0;
 	virtual void GetDebugPropertyInfo( CUtlVector< DebugPropertyOutput_t * > *pvecProperties ) = 0;
-	virtual void *unk316() = 0;
+	virtual const char *GetDebugDescription() = 0;
 	virtual void *unk317() = 0;
 	virtual void FindChildrenWithClass( CPanoramaSymbol symClass, CUtlVector< IUIPanel * > &vecMatchingChildren ) = 0;
 	virtual void FindChildrenWithClassTraverse( CPanoramaSymbol symClass, CUtlVector< IUIPanel * > &vecMatchingChildren ) = 0;
@@ -376,10 +379,10 @@ public:
 	virtual bool BAlwaysCacheCompositionLayer() const = 0;
 	virtual void SetForceNoCompositionLayer( bool bForceNoCompositionLayer ) = 0;
 	virtual bool BForceNoCompositionLayer() const = 0;
-	virtual void *unk338() = 0;
-	virtual void *unk339() = 0;
-	virtual void SetReadyForDisplay( bool bReady ) = 0;
 	virtual void RegisterForReadyEvents( bool bEnable ) = 0;
+	virtual bool BReadyForDisplay() const = 0;
+	virtual void SetReadyForDisplay( bool bReady ) = 0;
+	virtual void QueueDeferredUpdate() = 0;
 	virtual void *unk342() = 0;
 	virtual float StopAnimationOfPropertyUntilFrameUpdateAndGetStopTime( uint32 hSymbol ) = 0;
 	virtual bool BHasCachedCommandList() const = 0;
