@@ -33,6 +33,23 @@ struct C_ServerClassInfo
 	CGameNetworkableClass *m_pClientClass;
 };
 
+struct UserCmdTiming_t
+{
+	int32 m_nCommandNumber;
+	double m_flCommandTime;
+	double m_flCreateTime;
+	double m_flSendTime;
+	float m_flSendDelay;
+	int32 m_nSendSequence;
+	float m_flServerRecvMargin;
+
+private:
+	char pad_0[ 4 ];
+
+public:
+	bool m_bLate;
+};
+
 //-----------------------------------------------------------------------------
 // Purpose: Engine-facing client interface. Implemented by CNetworkGameClientBase.
 // Vtable indices are absolute (primary vtable of CNetworkGameClient, engine2.dll).
@@ -241,6 +258,17 @@ public:
 	int32 m_nClientTick;
 	int32 m_nServerTick;
 
+private:
+	char pad_5[ 2896352 ];
+
+public:
+	int32 m_nCommandQueueResyncCmd;
+
+private:
+	char pad_6[ 36 ];
+
+public:
+	UserCmdTiming_t m_UserCmdTiming[ 256 ];
 };
 
 #endif // ICLIENT_H
