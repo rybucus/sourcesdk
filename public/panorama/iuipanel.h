@@ -8,6 +8,7 @@
 #include <mathlib/vector.h>
 #include <mathlib/vector2d.h>
 #include <tier0/platform.h>
+#include <tier0/utlstringtoken.h>
 #include <tier1/utlvector.h>
 #include <panorama/layout/uilength.h>
 #include <panorama/panoramasymbol.h>
@@ -262,7 +263,7 @@ public:
 	virtual void *unk218() = 0;
 	virtual void *unk219() = 0;
 	virtual void *unk220() = 0;
-	virtual void *unk221() = 0;
+	virtual void MarkStylesDirty( bool bIncludeChildren ) = 0;
 	virtual void *unk222() = 0;
 	virtual void *unk223() = 0;
 	virtual void *unk224() = 0;
@@ -337,15 +338,15 @@ public:
 	virtual bool unk293( CPanoramaSymbol symName ) const = 0;
 	virtual void *unk294() = 0;
 	virtual void SetAnimation( const char *pchAnimationName, float flDuration, float flDelay, EAnimationTimingFunction eTimingFunc, EAnimationDirection eDirection, EAnimationFillMode eFillMode, float flIterations ) = 0;
-	virtual void *unk296() = 0;
-	virtual void *unk297() = 0;
-	virtual void *unk298() = 0;
-	virtual void *unk299() = 0;
-	virtual void SetDialogVariable( CPanoramaSymbol symName, const char *pchValue ) = 0;
-	virtual void SetDialogVariable_Int( CPanoramaSymbol symName, int nValue ) = 0;
-	virtual void SetDialogVariable_UInt64( CPanoramaSymbol symName, uint64 unValue ) = 0;
-	virtual void SetDialogVariable_Double( CPanoramaSymbol symName, double flValue ) = 0;
-	virtual void SetDialogVariableLocString( CPanoramaSymbol symName, const char *pchValue ) = 0;
+	virtual bool unk296( const CUtlStringAndToken &name, uint64 unValue ) = 0;
+	virtual bool SetDialogVariable_Int( const CUtlStringAndToken &name, int nValue ) = 0;
+	virtual bool unk298( const CUtlStringAndToken &name, const int64 &nValue ) = 0;
+	virtual bool SetDialogVariable_Time( const CUtlStringAndToken &name, int64 nTime ) = 0;
+	virtual bool SetDialogVariable( const CUtlStringAndToken &name, const char *pchValue ) = 0;
+	virtual bool unk301( const CUtlStringAndToken &name, int64 nValue ) = 0;
+	virtual bool SetDialogVariable_UInt64( const CUtlStringAndToken &name, uint64 unValue ) = 0;
+	virtual bool SetDialogVariable_Double( const CUtlStringAndToken &name, double flValue ) = 0;
+	virtual bool SetDialogVariableLocString( const CUtlStringAndToken &name, const char *pchValue ) = 0;
 	virtual void CloneDialogVariables( IUIPanel *pFrom ) = 0;
 	virtual void DirtyDialogVariable( CPanoramaSymbol symName ) = 0;
 	virtual void *unk307() = 0;
