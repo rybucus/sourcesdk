@@ -259,9 +259,11 @@ public:
 	int32 m_nServerTick;
 
 private:
-	char pad_5[ 2896352 ];
+	char pad_5[ 2896344 ];
 
 public:
+	int32 m_nLastCommandNumberExecuted;
+	int32 m_nLastCommandNumberRecv;
 	int32 m_nCommandQueueResyncCmd;
 
 private:
