@@ -55,6 +55,24 @@ struct RnMesh_t;
 struct RnCompound_t;
 struct PhysicsBodyDef_t;
 struct VPhysXAggregateData_t;
+struct Ray_t;
+class CTransform;
+
+struct ShapeTraceResult_t
+{
+	uint8 m_pad0000[ 0x10 ];
+	Vector m_vEndPos;
+	Vector m_vHitNormal;
+	uint8 m_pad0028[ 0xc ];
+	float m_flFraction = 1.0f;
+	int32 m_nUnk038 = -1;
+	bool m_bUnk03C;
+	uint8 m_pad003D[ 0x3 ];
+	bool m_bUnk040;
+	uint8 m_pad0041[ 0xf ];
+};
+
+COMPILE_TIME_ASSERT( sizeof( ShapeTraceResult_t ) == 0x50 );
 
 abstract_class IVPhysics2 : public IAppSystem
 {
@@ -123,7 +141,7 @@ public:
 	virtual void unk043( void *p ) = 0;
 	virtual void unk044( void *p ) = 0;
 
-	virtual void unk045( void *p ) = 0;
+	virtual void CastRayAgainstShape( ShapeTraceResult_t *pResult, const Ray_t &ray, const Vector &vStart, const Vector &vDelta, const Ray_t &shape, const CTransform &transform ) = 0;
 
 	virtual void Unk_TraceShape( void *p ) = 0;
 

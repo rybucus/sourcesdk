@@ -973,30 +973,7 @@ struct surfacesoundhandles_t
 	short	strainSound;
 };
 
-struct surfacegameprops_t
-{
-// game movement data
-	float			maxSpeedFactor;			// Modulates player max speed when walking on this surface
-	float			jumpFactor;				// Indicates how much higher the player should jump when on the surface
-// Game-specific data
-	unsigned short	material;
-	// Indicates whether or not the player is on a ladder.
-	unsigned char	climbable;
-	unsigned char	pad;
-};
-
-//-----------------------------------------------------------------------------
-// Purpose: Each different material has an entry like this
-//-----------------------------------------------------------------------------
-struct surfacedata_t
-{
-	surfacephysicsparams_t	physics;	// physics parameters
-	surfaceaudioparams_t	audio;		// audio parameters
-	surfacesoundnames_t		sounds;		// names of linked sounds
-	surfacegameprops_t		game;		// Game data / properties
-
-	surfacesoundhandles_t		soundhandles;
-};
+struct surfacedata_t;
 
 #define VPHYSICS_SURFACEPROPS_INTERFACE_VERSION	"VPhysicsSurfaceProps001"
 abstract_class IPhysicsSurfaceProps

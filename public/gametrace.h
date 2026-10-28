@@ -23,6 +23,8 @@
 
 class IPhysicsBody;
 class IPhysicsShape;
+class IPhysSurfacePropertyController;
+class KeyValues3;
 
 typedef IPhysicsBody* HPhysicsBody;
 typedef IPhysicsShape* HPhysicsShape;
@@ -219,6 +221,177 @@ public:
 	CPhysSurfacePropertiesSoundNames m_audioSounds;
 	CPhysSurfacePropertiesAudio m_audioParams;
 };
+
+class CPhysSurfacePropertyHandle
+{
+public:
+	CPhysSurfacePropertyHandle() = default;
+	explicit CPhysSurfacePropertyHandle( int nIndex );
+	explicit CPhysSurfacePropertyHandle( const CPhysSurfaceProperties *pProperties );
+
+	void Init( int nIndex );
+	void Term();
+	void Set( const CPhysSurfaceProperties *pProperties );
+
+	bool IsValid() const;
+	int GetIndex() const;
+
+	CPhysSurfaceProperties *Get() const;
+
+	operator CPhysSurfaceProperties *() const;
+	CPhysSurfaceProperties *operator->() const;
+
+	bool operator!() const;
+	bool operator==( const CPhysSurfacePropertyHandle &other ) const;
+	bool operator!=( const CPhysSurfacePropertyHandle &other ) const;
+	bool operator==( const CPhysSurfaceProperties *pProperties ) const;
+	bool operator!=( const CPhysSurfaceProperties *pProperties ) const;
+	const CPhysSurfacePropertyHandle &operator=( const CPhysSurfaceProperties *pProperties );
+
+private:
+	int16 m_nIndex;
+};
+
+COMPILE_TIME_ASSERT( sizeof( CPhysSurfacePropertyHandle ) == 0x2 );
+
+inline CPhysSurfacePropertyHandle::CPhysSurfacePropertyHandle( int nIndex )
+{
+	Init( nIndex );
+}
+
+inline CPhysSurfacePropertyHandle::CPhysSurfacePropertyHandle( const CPhysSurfaceProperties *pProperties )
+{
+	Set( pProperties );
+}
+
+inline void CPhysSurfacePropertyHandle::Init( int nIndex )
+{
+	m_nIndex = static_cast< int16 >( nIndex );
+}
+
+inline void CPhysSurfacePropertyHandle::Term()
+{
+	m_nIndex = -1;
+}
+
+inline void CPhysSurfacePropertyHandle::Set( const CPhysSurfaceProperties *pProperties )
+{
+	if ( pProperties )
+	{
+		Init( pProperties->m_nListIndex );
+	}
+	else
+	{
+		Term();
+	}
+}
+
+inline bool CPhysSurfacePropertyHandle::IsValid() const
+{
+	return m_nIndex >= 0;
+}
+
+inline int CPhysSurfacePropertyHandle::GetIndex() const
+{
+	return m_nIndex;
+}
+
+inline CPhysSurfacePropertyHandle::operator CPhysSurfaceProperties *() const
+{
+	return Get();
+}
+
+inline CPhysSurfaceProperties *CPhysSurfacePropertyHandle::operator->() const
+{
+	return Get();
+}
+
+inline bool CPhysSurfacePropertyHandle::operator!() const
+{
+	return !Get();
+}
+
+inline bool CPhysSurfacePropertyHandle::operator==( const CPhysSurfacePropertyHandle &other ) const
+{
+	return m_nIndex == other.m_nIndex;
+}
+
+inline bool CPhysSurfacePropertyHandle::operator!=( const CPhysSurfacePropertyHandle &other ) const
+{
+	return m_nIndex != other.m_nIndex;
+}
+
+inline bool CPhysSurfacePropertyHandle::operator==( const CPhysSurfaceProperties *pProperties ) const
+{
+	if ( !pProperties )
+	{
+		return !IsValid();
+	}
+
+	return m_nIndex == pProperties->m_nListIndex;
+}
+
+inline bool CPhysSurfacePropertyHandle::operator!=( const CPhysSurfaceProperties *pProperties ) const
+{
+	return !operator==( pProperties );
+}
+
+inline const CPhysSurfacePropertyHandle &CPhysSurfacePropertyHandle::operator=( const CPhysSurfaceProperties *pProperties )
+{
+	Set( pProperties );
+	return *this;
+}
+
+struct surfacegameprops_t
+{
+	float m_flMaxSpeedFactor;
+	float m_flJumpFactor;
+	float m_flPenetrationDistanceModifier;
+	float m_flPenetrationDamageModifier;
+	CUtlStringToken m_nLegacyMaterialTag;
+	uint16 m_nGameMaterial;
+	uint16 m_nSoundStackMaterial;
+	bool m_bClimbable;
+	bool m_bIsStairs;
+	bool m_bIsSlippery;
+	bool m_bAllowSmokeThrough;
+	bool m_bReflectBullets;
+	bool m_bReduceWeaponImpact;
+	bool m_bBulletsPenetrate;
+};
+
+COMPILE_TIME_ASSERT( sizeof( surfacegameprops_t ) == 0x20 );
+
+struct surfacedata_t
+{
+	surfacegameprops_t game;
+};
+
+COMPILE_TIME_ASSERT( sizeof( surfacedata_t ) == 0x20 );
+
+class CSurfacePropReloadableDataTableBase
+{
+public:
+	virtual void ResizeEntries( int nCount ) = 0;
+	virtual void CopyEntry( int nDest, int nSource ) = 0;
+	virtual void ParseEntry( int nIndex, KeyValues3 *pEntry ) = 0;
+	virtual void Reload( IPhysSurfacePropertyController *pController ) = 0;
+
+public:
+	CSurfacePropReloadableDataTableBase *m_pNext;
+	CUtlString m_FileName;
+	int m_nVersion;
+};
+
+COMPILE_TIME_ASSERT( sizeof( CSurfacePropReloadableDataTableBase ) == 0x20 );
+
+class CGameSurfacePropertiesList : public CSurfacePropReloadableDataTableBase
+{
+public:
+	CUtlVector< surfacedata_t > m_Entries;
+};
+
+COMPILE_TIME_ASSERT( sizeof( CGameSurfacePropertiesList ) == 0x38 );
 
 class CHitBox
 {
