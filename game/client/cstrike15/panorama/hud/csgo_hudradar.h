@@ -14,11 +14,11 @@ public:
 	virtual bool unk084( void *pIcon ) = 0;
 
 private:
-	uint8 m_pad060[ 0x177A8 ];
+	uint8 m_pad060[ 0x175A6 ];
 public:
 	uint8 m_nRadarFlags;
 private:
-	uint8 m_pad17809[ 0x837 ];
+	uint8 m_pad17607[ 0xA39 ];
 };
 
 COMPILE_TIME_ASSERT( sizeof( CCSGO_HudRadar ) == 0x18040 );
