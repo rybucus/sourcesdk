@@ -22,7 +22,8 @@ struct PostDataUpdateCall_t;
 enum PredictionReason_t : int
 {
 	PREDICTION_REASON_CLIENT_COMMAND_TICK = 0,
-	PREDICTION_REASON_PACKET_ENTITIES = 1,
+	PREDICTION_REASON_POSTNETUPDATE = 1,
+	PREDICTION_REASON_CLIENT_FRAME_SIMULATE = 2,
 };
 
 //-----------------------------------------------------------------------------
