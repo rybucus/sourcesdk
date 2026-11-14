@@ -48,6 +48,7 @@ class IFnPhysicsBody;
 class IFnPhysicsSoftbody;
 class IFnPhysicsWorld;
 
+struct Ray_t;
 struct RnSphere_t;
 struct RnCapsule_t;
 struct RnHull_t;
@@ -73,6 +74,13 @@ struct ShapeTraceResult_t
 };
 
 COMPILE_TIME_ASSERT( sizeof( ShapeTraceResult_t ) == 0x50 );
+
+// Pointer and element count pair, passed by value
+struct RnElementSpan_t
+{
+	const void *m_pElements;
+	size_t m_nCount;
+};
 
 abstract_class IVPhysics2 : public IAppSystem
 {
@@ -143,7 +151,7 @@ public:
 
 	virtual void CastRayAgainstShape( ShapeTraceResult_t *pResult, const Ray_t &ray, const Vector &vStart, const Vector &vDelta, const Ray_t &shape, const CTransform &transform ) = 0;
 
-	virtual void Unk_TraceShape( void *p ) = 0;
+	virtual void Unk_TraceShape( void *pUnknown1, const Ray_t &ray, void *pUnknown3, void *pUnknown4, void *pUnknown5, void *pUnknown6 ) = 0;
 
 #ifdef _WIN32
 	virtual void unk047( void *p ) = 0;
@@ -185,13 +193,9 @@ public:
 	virtual RnHull_t *CreateConeHull( const Vector &vStart, const Vector &vEnd, float flRadius, void *pUnknown ) = 0;
 	virtual RnHull_t *CreateCylinderHull( const Vector &vStart, const Vector &vEnd, float flRadius, void *pUnknown ) = 0;
 
-#ifdef _WIN32
-	virtual void Unk_CreateHullFromStream( void *p ) = 0;
-	virtual void Unk_CreateHull( void *p ) = 0;
-#else
-	virtual void Unk_CreateHull( void *p ) = 0;
-	virtual void Unk_CreateHullFromStream( void *p ) = 0;
-#endif
+	// Both wrap RnHullCreate. The second overload first gathers the points from a strided vertex stream
+	virtual RnHull_t *CreateHull( int nPointCount, const Vector *pPoints, void *pUnknown1, const void *pUnknown2 ) = 0;
+	virtual RnHull_t *CreateHull( const void *pVertexStream, void *pUnknown1, const void *pUnknown2 ) = 0;
 
 	virtual RnHull_t *CreateRuntimeHull( int nPointCount, const Vector *pPoints ) = 0;
 	virtual RnHull_t *CreateRuntimeHullFromPlanes( int nPlaneCount, const void *pPlanes, float flUnknown, const Vector &vUnknown ) = 0;
@@ -203,22 +207,20 @@ public:
 
 	virtual RnMesh_t *CreateGridMesh( int nHalfExtent, float flSpacing, float flHeight ) = 0;
 
-#ifdef _WIN32
-	virtual void Unk_CreateMeshFromStream( void *p ) = 0;
-	virtual void Unk_CreateMesh( void *p ) = 0;
-#else
-	virtual void Unk_CreateMesh( void *p ) = 0;
-	virtual void Unk_CreateMeshFromStream( void *p ) = 0;
-#endif
+	// Both wrap RnMeshCreate. The second overload takes the triangles and vertices from a mesh stream.
+	// A NULL pOptions uses the default mesh build options
+	virtual RnMesh_t *CreateMesh( int nTriangleCount, const void *pTriangles, const void *pUnknown1, int nVertexCount, const Vector *pVertices, void *pUnknown2, const void *pOptions ) = 0;
+	virtual RnMesh_t *CreateMesh( const void *pMeshStream, void *pUnknown2, const void *pOptions ) = 0;
 
 	virtual void CloneMesh( RnMesh_t *pDestMesh, const RnMesh_t *pSourceMesh ) = 0;
 	virtual void DestroyMesh( RnMesh_t *pMesh ) = 0;
 	virtual void UpdateMeshChangedVertices( RnMesh_t *pMesh ) = 0;
 
-	virtual void Unk_UpdateMeshTriangleAABBs( void *p ) = 0;
-	virtual void Unk_HideMeshTriangles( void *p ) = 0;
+	virtual void UpdateMeshTriangleAABBs( RnMesh_t *pMesh, RnElementSpan_t triangles ) = 0;
+	// The span holds 32-bit triangle indices
+	virtual void HideMeshTriangles( RnMesh_t *pMesh, RnElementSpan_t triangleIndices ) = 0;
 
-	virtual void Unk_CreateCompound( void *p ) = 0;
+	virtual RnCompound_t *Unk_CreateCompound( RnElementSpan_t unknown1, RnElementSpan_t unknown2, RnElementSpan_t unknown3, RnElementSpan_t unknown4, RnElementSpan_t unknown5, void *pUnknown6 ) = 0;
 	virtual void CloneCompound( RnCompound_t *pDestCompound, const RnCompound_t *pSourceCompound ) = 0;
 	virtual void DestroyCompound( RnCompound_t *pCompound ) = 0;
 
@@ -249,7 +251,8 @@ public:
 	virtual void DestroyListedSoftbody( IPhysicsSoftbody *pSoftbody ) = 0;
 
 	virtual int GetSoftbodyCount() = 0;
-	virtual void unk095( void *p ) = 0;
+	// Returns a softbody count; used when pulling the softbody transforms
+	virtual int unk095( uint8 nFlags, void *pUnknown ) = 0;
 
 	virtual IIkSolver *Unk_CreateIkSolver( void *p ) = 0;
 	virtual void DestroyIkSolver( IIkSolver *pSolver ) = 0;
@@ -325,8 +328,8 @@ public:
 	// Empty
 	virtual void unk143() = 0;
 
-	// Copies a 128-byte block into every world
-	virtual void unk144( void *p ) = 0;
+	// Copies the 128-byte block at pBlock into every world
+	virtual void unk144( uint32 nUnknown, const void *pBlock ) = 0;
 
 	virtual const char *GetMassDescription( float flMass ) = 0;
 };

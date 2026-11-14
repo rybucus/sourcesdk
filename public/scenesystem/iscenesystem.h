@@ -14,12 +14,14 @@
 #include <materialsystem2/imaterial2.h>
 #include <mathlib/vector.h>
 #include <resourcesystem/resourcehandle.h>
+#include <scenesystem/isceneview.h>
 
 class CSceneObject;
 class CSceneLightObject;
 class ISceneObjectDesc;
 class ISceneWorld;
 class ISceneView;
+class CFrustum;
 class IRenderDevice;
 class IRayTraceSceneWorld;
 struct SceneSystemPerFrameStats_t;
@@ -57,7 +59,9 @@ public:
 	virtual void AddRenderableType( const char *pszName, ISceneObjectDesc *pDesc ) = 0;
 	virtual void RemoveRenderableType( const char *pszName ) = 0;
 	virtual void BeginRenderingViews( IRenderDevice *pRenderDevice, bool bUpdateStats ) = 0;
-	virtual void Unk_AddView( void *p ) = 0;
+	// Between BeginRenderingViews and FinishRenderingViews; the view renders into hSwapChain.
+	// A non-null pWorld is added with ISceneView::AddWorldToRenderList( pWorld, pVisBits, true )
+	virtual ISceneView *AddView( const char *pszName, const CViewId &viewId, const CFrustum &frustum, SwapChainHandle_t hSwapChain, ISceneWorld *pWorld, const RenderViewport_t &viewport, const uint32 *pVisBits, int nPriority ) = 0;
 	virtual void Unk_AddDynamicView( void *p ) = 0;
 	virtual void Unk_BeginRenderingDynamicView( ISceneView *pView ) = 0;
 	virtual void Unk_AddDependentView( void *p ) = 0;
@@ -65,7 +69,7 @@ public:
 	virtual bool WaitForRenderingToComplete() = 0;
 	virtual bool IsRenderingBusy() = 0;
 	virtual void SetSceneObjectBounds( CSceneObject *pObject, const Vector &vecMins, const Vector &vecMaxs ) = 0;
-	virtual void unk029() = 0;
+	virtual void unk029( void *pUnknown ) = 0;
 
 	// Returns FLT_MAX extents when the object has no bounds yet.
 	virtual void GetSceneObjectBounds( CSceneObject *pObject, Vector *pMins, Vector *pMaxs ) = 0;
@@ -91,8 +95,8 @@ public:
 	virtual ISceneWorld *CreateWorld( const char *pszDebugName ) = 0;
 	virtual void DestroyWorld( ISceneWorld *pWorld ) = 0;
 	virtual void unk046() = 0;
-	virtual void unk047() = 0;
-	virtual void unk048() = 0;
+	virtual void *unk047( int nIndex ) = 0;
+	virtual void *unk048( int nIndex, uint8 nSubIndex ) = 0;
 	virtual void unk049() = 0;
 	virtual void unk050() = 0;
 	virtual HRenderTexture GetWellKnownTexture( int nTexture ) = 0;
@@ -105,9 +109,10 @@ public:
 	virtual void unk058() = 0;
 	virtual void unk059() = 0;
 	virtual void Unk_AddTextureToSet( void *p ) = 0;
-	virtual void unk061() = 0;
+	virtual void unk061( void *pUnknown1, int nUnknown2 ) = 0;
 	virtual void unk062() = 0;
-	virtual void unk063() = 0;
+	// Returns -1 for a NULL pointer
+	virtual int unk063( void *pUnknown1, int nUnknown2 ) = 0;
 	virtual void unk064() = 0;
 	virtual void unk065() = 0;
 	virtual void unk066() = 0;
@@ -134,7 +139,7 @@ public:
 	virtual void unk082() = 0;
 	virtual void Unk_PrintPerFrameStats( void *p ) = 0;
 	virtual SceneSystemPerFrameStats_t &GetPerFrameStats() = 0;
-	virtual void unk085() = 0;
+	virtual int unk085() = 0;
 	virtual void unk086() = 0;
 	virtual void unk087() = 0;
 	virtual void unk088() = 0;
@@ -146,8 +151,9 @@ public:
 	virtual void unk092() = 0;
 	virtual void unk093() = 0;
 	virtual void unk094() = 0;
-	virtual void unk095() = 0;
-	virtual void unk096() = 0;
+	// The view id of a player, -1 for views of no player: m_nViewId is the inverted CRC64 of nPlayerId
+	virtual CViewId unk095( int nPlayerId ) = 0;
+	virtual void *unk096( void *pUnknown ) = 0;
 	virtual void unk097() = 0;
 	virtual void unk098() = 0;
 	virtual void unk099() = 0;
@@ -181,9 +187,10 @@ public:
 	virtual void unk122() = 0;
 	virtual void unk123() = 0;
 	virtual void unk124() = 0;
-	virtual void unk125() = 0;
+	// Allocates the extra per-object data block when the object has none
+	virtual void unk125( void *pUnknown ) = 0;
 	virtual void unk126() = 0;
-	virtual void unk127() = 0;
+	virtual void unk127( void *pUnknown ) = 0;
 	virtual void unk128() = 0;
 	virtual void unk129() = 0;
 	virtual void unk130() = 0;
@@ -192,7 +199,7 @@ public:
 	virtual void unk133() = 0;
 	virtual void unk134() = 0;
 	virtual void unk135() = 0;
-	virtual void unk136() = 0;
+	virtual void *unk136( void *pUnknown ) = 0;
 	virtual void unk137() = 0;
 	virtual void unk138() = 0;
 
@@ -221,16 +228,16 @@ public:
 	virtual void unk152() = 0;
 	virtual void unk153() = 0;
 	virtual void unk154() = 0;
-	virtual void unk155() = 0;
-	virtual void unk156() = 0;
+	virtual int unk155() = 0;
+	virtual int unk156() = 0;
 	virtual void Unk_CreateAOProxySceneObject( void *p ) = 0;
 
 	// Reads ao_proxy_capsule_list and ao_proxy_box_list.
 	virtual void Unk_LoadAOProxies( void *p ) = 0;
 
 	virtual void Unk_UpdateAOProxySceneObject( void *p ) = 0;
-	virtual void unk160() = 0;
-	virtual void unk161() = 0;
+	virtual void *unk160( void *pUnknown1, int nUnknown2, void *pUnknown3, void *pUnknown4, void *pUnknown5 ) = 0;
+	virtual void unk161( void *pUnknown1, int nUnknown2 ) = 0;
 	virtual void unk162() = 0;
 	virtual void unk163() = 0;
 	virtual void unk164() = 0;

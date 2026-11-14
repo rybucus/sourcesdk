@@ -4,13 +4,20 @@
 #include "engine2/igameresourceservice.h"
 #include "interfaces/interfaces.h"
 
+CGameEntitySystem *GetGameEntitySystem( IGameResourceService *pGameResourceService )
+{
+	Assert( pGameResourceService );
+
+	if ( !pGameResourceService )
+		return nullptr;
+
+	return static_cast< CGameEntitySystem * >( static_cast< CGameResourceService * >( pGameResourceService )->m_pEntityResourceManifestHandler );
+}
+
 CGameEntitySystem *GameEntitySystem()
 {
 	IGameResourceService *pService = g_pGameResourceServiceServer ? g_pGameResourceServiceServer : g_pGameResourceServiceClient;
-	if ( !pService )
-		return nullptr;
-
-	return static_cast< CGameResourceService * >( pService )->m_pEntitySystem;
+	return pService ? GetGameEntitySystem( pService ) : nullptr;
 }
 
 CEntityIdentity* CEntitySystem::GetEntityIdentity(CEntityIndex entnum)
