@@ -228,8 +228,9 @@ public:
 	}
 
 private:
-	char pad_0[ 200 ];
+	char pad_0[ 196 ];
 public:
+	float m_flUsercmdTickFraction;
 	bool m_bInSimulation;
 
 private:
