@@ -27,6 +27,68 @@ namespace panorama
 
 class CTopLevelWindow;
 
+typedef void ( *PanoramaFrameFunc_t )();
+
+typedef int JSGenericCallbackHandle_t;
+const JSGenericCallbackHandle_t JS_GENERIC_CALLBACK_HANDLE_INVALID = -1;
+
+struct RegisterJSScopeInfo_t
+{
+	const char *pName;
+	const char *pDescription;
+	int nEntries;
+};
+
+enum RegisterJSType_t : uint8
+{
+	k_ERegisterJSTypeUnknown,
+	k_ERegisterJSTypeInvalid,
+	k_ERegisterJSTypeVoid,
+	k_ERegisterJSTypeBool,
+	k_ERegisterJSTypeInt8,
+	k_ERegisterJSTypeUint8,
+	k_ERegisterJSTypeInt16,
+	k_ERegisterJSTypeUint16,
+	k_ERegisterJSTypeInt32,
+	k_ERegisterJSTypeUint32,
+	k_ERegisterJSTypeInt64,
+	k_ERegisterJSTypeUint64,
+	k_ERegisterJSTypeFloat,
+	k_ERegisterJSTypeDouble,
+	k_ERegisterJSTypeConstString,
+	k_ERegisterJSTypePanoramaSymbol,
+	k_ERegisterJSTypeRawV8Args,
+	k_ERegisterJSTypeScaleformCompatAccessor,
+	k_ERegisterJSTypeScaleformCompatArgs,
+	k_ERegisterJSTypeUtlString,
+
+	k_ERegisterJSTypeMax,
+};
+
+struct RegisterJSEntryInfo_t
+{
+	enum
+	{
+		k_EGlobalFunction = 0x00000000,
+		k_EMethod = 0x00000001,
+		k_EAccessor = 0x00000002,
+		k_EAccessorReadOnly = 0x00000003,
+		k_EConstantValue = 0x00000004,
+		k_EEntryTypeMask = 0x0000000f,
+	};
+
+	static const uint8 k_unNumParamsUnknown = 0xff;
+	static const uint8 k_unMaxParams = 10;
+
+	const char *pName;
+	const char *pDescription;
+	uint32 unFlags;
+	RegisterJSType_t eDataType;
+	uint8 unNumParams;
+	RegisterJSType_t pParamTypes[ k_unMaxParams ];
+	const char *pParamNames[ k_unMaxParams ];
+};
+
 class CChunkAllocator
 {
 public:

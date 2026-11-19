@@ -6,14 +6,7 @@
 #endif
 
 #include <resourcefile/resourcehandle.h>
-
-class CModel;
-
-class InfoForResourceTypeCModel
-{
-public:
-	using RuntimeClass_t = CModel;
-};
+#include <resourcesystem/resourcehandletypes.h>
 
 using HModelStrong = CStrongHandle< InfoForResourceTypeCModel >;
 using HModelWeak = CWeakHandle< InfoForResourceTypeCModel >;
