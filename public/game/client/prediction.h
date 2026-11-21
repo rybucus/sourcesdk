@@ -46,22 +46,27 @@ private:
 	uint8 m_nUnknown0058[40];
 
 public:
-	// Newest command the server acknowledged. CPrediction::ShowPredictionErrors looks up the
-	// predicted frame of this command; predicted frame slot i holds command
-	// m_nLastAcknowledgedCommand + 1 + i.
+	// Newest command the server executed ( "player.m_nLastExecutedCommand" in CPrediction::Update ).
+	// CPrediction::NetUpdateStart copies it from CNetworkGameClient::m_nLastCommandNumberExecuted.
 	int m_nLastAcknowledgedCommand;
 
-	// Acknowledged command before the last network update ( "%d commands acked (%d->%d)" in
-	// CPrediction::PostNetworkDataReceived ), set to m_nLastAcknowledgedCommand at its end.
-	int m_nPreviousAcknowledgedCommand;
+	// Base of the predicted frame slots: slot i holds the state after command
+	// m_nBasePredictedCommand + 1 + i ( checked by CPrediction::Update and
+	// CPrediction::PostNetworkDataReceived ). PostNetworkDataReceived trims the slots to the new
+	// m_nLastAcknowledgedCommand and then sets this to it, so the two differ only between
+	// NetUpdateStart and the end of PostNetworkDataReceived.
+	int m_nBasePredictedCommand;
 
 	// Newest predicted command; CPrediction::NetUpdatePreStart re-runs this one, so the state
-	// before it is predicted frame slot m_nLastPredictedCommand - m_nLastAcknowledgedCommand - 2.
+	// before it is predicted frame slot m_nLastPredictedCommand - m_nBasePredictedCommand - 2.
 	int m_nLastPredictedCommand;
 
 private:
-	uint8 m_nUnknown008C[52];
+	uint8 m_nUnknown008C[44];
 };
+
+// CPrediction::NetUpdatePreStart walks CPrediction::m_Splits with a 0xB8 stride
+COMPILE_TIME_ASSERT( sizeof( PredictionSplit_t ) == 0xB8 );
 
 //-----------------------------------------------------------------------------
 // Client side prediction manager, the client module's Source2ClientPrediction001

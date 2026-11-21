@@ -162,9 +162,10 @@ public:
 	virtual int GetLastEntityUpdateTick() const;
 	// Named by what it does: the same tick GetLastServerTick returns
 	virtual int GetLastReceivedServerTick() const;
-	// Named by what it does: the newest command number of CNetworkGameClient's user command ring
-	virtual int GetLastOutgoingCommand() const;
-	// Named by what it does: whether that ring still holds command nCommand
+	// The last user command the server executed ( m_nLastCommandNumberExecuted )
+	virtual int GetLastCommandNumberExecuted() const;
+	// Named by what it does: nCommand is at most GetLastCommandNumberExecuted and its entry is
+	// still in m_OutgoingCommands
 	virtual bool HasOutgoingCommand( int nCommand ) const;
 	virtual void SetFrameTime( float flFrameTime );
 	virtual void Connect( CSplitScreenSlot nSlot, int nSocket, const ns_address *pAddr, int nChannelFlags, bool bSlotFlag );
@@ -623,7 +624,11 @@ public:
 	int m_nPolledServerTick;
 	int m_nLastEntityUpdateTick;
 	int m_nCommandBase;
-	int m_nLastOutgoingCommand;
+	// CSVCMsg_PacketEntities::last_cmd_number_executed, stored by CheckCommandOrder; SendMovePacket
+	// spews it as "Client thinks server has executed up to command %d"
+	int m_nLastCommandNumberExecuted;
+	// m_nLastCommandNumberExecuted + CSVCMsg_PacketEntities::last_cmd_number_recv_delta: the last
+	// user command the server received. SendMovePacket sends the commands after it
 	int m_nLastAcknowledgedCommand;
 	int m_nTickPacketMarginTicks;
 	// Non-zero blocks ProcessTick and ApplyClockDrift (demo playback)
