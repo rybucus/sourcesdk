@@ -26,9 +26,16 @@ public:
 //-----------------------------------------------------------------------------
 // Call this to connect to/disconnect from all tier 2 libraries.
 // It's up to the caller to check the globals it cares about to see if ones are missing
+//
+// Connects no interface: when g_pResourceManifestRegistry is set, registers
+// g_nResourceFrameCount with it (once) and every static resource manifest of
+// the module. Calls are counted; the last disconnect unregisters both.
 //-----------------------------------------------------------------------------
 void ConnectTier2Libraries( CreateInterfaceFn *pFactoryList, int nFactoryCount );
 void DisconnectTier2Libraries();
+
+// Unregisters the manifests an app system registered by hand from the resource manifest registry
+void DisconnectTier2ManualManifests( ResourceManifestDesc_t **ppManifests, int nManifestCount );
 
 
 //-----------------------------------------------------------------------------
@@ -49,18 +56,59 @@ void InitCommandLineProgram( int &argc, char ** &argv );
 //-----------------------------------------------------------------------------
 // Helper empty implementation of an IAppSystem for tier2 libraries
 //-----------------------------------------------------------------------------
-template< class IInterface, int ConVarFlag = 0 > 
+template< class IInterface, int64 ConVarFlag = 0 >
 class CTier2AppSystem : public CTier1AppSystem< IInterface, ConVarFlag >
 {
 	typedef CTier1AppSystem< IInterface, ConVarFlag > BaseClass;
 
 public:
+	virtual bool Connect( CreateInterfaceFn factory )
+	{
+		if ( !BaseClass::Connect( factory ) )
+			return false;
+
+		ConnectTier2Libraries( &factory, 1 );
+		++m_nAppSysTier2LibraryConnects;
+		return true;
+	}
+
+	virtual void Disconnect()
+	{
+		DisconnectTier2ManualManifests( m_manualManifests.Base(), m_manualManifests.Count() );
+		while ( m_nAppSysTier2LibraryConnects > 0 )
+		{
+			DisconnectTier2Libraries();
+			--m_nAppSysTier2LibraryConnects;
+		}
+		BaseClass::Disconnect();
+	}
+
+	// Overridden at this level in the game, with the behaviour of the base
+	virtual InitReturnVal_t Init()
+	{
+		return BaseClass::Init();
+	}
+
+	virtual void Shutdown()
+	{
+		BaseClass::Shutdown();
+	}
+
+	virtual void Reconnect( CreateInterfaceFn factory, const char *pInterfaceName )
+	{
+		BaseClass::Reconnect( factory, pInterfaceName );
+		ConnectTier2Libraries( &factory, 1 );
+		++m_nAppSysTier2LibraryConnects;
+	}
+
 	virtual AppSystemTier_t GetTier()
 	{
 		return APP_SYSTEM_TIER2;
 	}
-	CUtlVector<ResourceManifestDesc_t *> m_manualManifests;
-	int m_nAppSysTier2LibraryConnects;
+
+	CUtlVector< ResourceManifestDesc_t * > m_manualManifests;
+	// Number of ConnectTier2Libraries() calls that Disconnect() has to undo
+	int m_nAppSysTier2LibraryConnects = 0;
 };
 
 class CTier2Application : public CTier1Application
@@ -69,36 +117,6 @@ public:
 	CAppSystemDict* m_pDict;
 	int m_nAppTier2LibraryConnects;
 };
-
-//-----------------------------------------------------------------------------
-// Distance fade information
-//-----------------------------------------------------------------------------
-enum FadeMode_t
-{
-	// These map directly to cpu_level, and g_aFadeData contains settings for each given cpu_level (see videocfg.h CPULevel_t).
-	// The exception is 'FADE_MODE_LEVEL', which refers to level-specific values in the map entity.
-	FADE_MODE_NONE = 0,
-	FADE_MODE_LOW,
-	FADE_MODE_MED,
-	FADE_MODE_HIGH,
-	FADE_MODE_360,
-	FADE_MODE_PS3,
-	FADE_MODE_LEVEL,
-
-	FADE_MODE_COUNT,
-};
-
-struct FadeData_t
-{
-	float	m_flPixelMin;		// Size (height in pixels) above which objects start to fade in
-	float	m_flPixelMax;		// Size (height in pixels) above which objects are fully faded in
-	float	m_flWidth;			// Reference screen res w.r.t which the above pixel values were chosen
-	float	m_flFadeDistScale;	// Scale factor applied before entity distance-based fade is calculated
-};
-
-// see tier2.cpp for data!
-extern FadeData_t g_aFadeData[FADE_MODE_COUNT];
-
 
 //-----------------------------------------------------------------------------
 // Used by the resource system for fast resource frame counter

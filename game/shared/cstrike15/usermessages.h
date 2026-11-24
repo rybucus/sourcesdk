@@ -15,9 +15,6 @@
 #include <cstrike15_usermessages.pb.h>
 
 class CCSUsrMsg_VGUIMenu_t                        : public CUserMessagePB< CS_UM_VGUIMenu, CCSUsrMsg_VGUIMenu > {};
-class CCSUsrMsg_Geiger_t                          : public CUserMessagePB< CS_UM_Geiger, CCSUsrMsg_Geiger > {};
-class CCSUsrMsg_Train_t                           : public CUserMessagePB< CS_UM_Train, CCSUsrMsg_Train > {};
-class CCSUsrMsg_HudText_t                         : public CUserMessagePB< CS_UM_HudText, CCSUsrMsg_HudText > {};
 class CCSUsrMsg_SendAudio_t                       : public CUserMessagePB< CS_UM_SendAudio, CCSUsrMsg_SendAudio > {};
 class CCSUsrMsg_RawAudio_t                        : public CUserMessagePB< CS_UM_RawAudio, CCSUsrMsg_RawAudio > {};
 class CCSUsrMsg_Damage_t                          : public CUserMessagePB< CS_UM_Damage, CCSUsrMsg_Damage > {};
@@ -58,6 +55,8 @@ class CCSUsrMsg_CurrentRoundOdds_t                : public CUserMessagePB< CS_UM
 class CCSUsrMsg_DeepStats_t                       : public CUserMessagePB< CS_UM_DeepStats, CCSUsrMsg_DeepStats > {};
 class CCSUsrMsg_ShootInfo_t                       : public CUserMessagePB< CS_UM_ShootInfo, CCSUsrMsg_ShootInfo > {};
 class CCSUsrMsg_CounterStrafe_t                   : public CUserMessagePB< CS_UM_CounterStrafe, CCSUsrMsg_CounterStrafe > {};
+class CCSUsrMsg_SendPlayerLoadout_t               : public CUserMessagePB< CS_UM_SendPlayerLoadout, CCSUsrMsg_SendPlayerLoadout > {};
+class CCSUsrMsg_WeaponMagDrop_t                   : public CUserMessagePB< CS_UM_WeaponMagDrop, CCSUsrMsg_WeaponMagDrop > {};
 class CCSUsrMsg_CustomHudClicked_t                : public CUserMessagePB< CS_UM_CustomHudClicked, CCSUsrMsg_CustomHudClicked > {};
 
 
