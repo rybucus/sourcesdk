@@ -100,6 +100,8 @@ public:
 	virtual bool IsLockedByCurrentThread() = 0;
 	virtual void QueueCallbackForNextUpdate( const CUtlDelegate< void () > &callback ) = 0;
 	virtual ResourceHandle_t FindOrRegisterResourceByName_Internal( CResourceString &pResourceName, bool bCheckValid ) = 0;
+
+	virtual ~IResourceSystem() {}
 };
 
 DECLARE_TIER2_INTERFACE( IResourceSystem, g_pResourceSystem );
