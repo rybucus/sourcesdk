@@ -11,9 +11,14 @@ set(PLATFORM_COMPILE_OPTIONS
 
 	/wd4005 /wd4819 /wd4828 /wd5033
 	/wd4245 /wd4018
-	/permissive- /utf-8 /MP
-	/arch:SSE4.2
+	/permissive- /utf-8
 )
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	list(APPEND PLATFORM_COMPILE_OPTIONS /clang:-msse4.2)
+else()
+	list(APPEND PLATFORM_COMPILE_OPTIONS /MP /arch:SSE4.2)
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(PLATFORM_LINK_OPTIONS

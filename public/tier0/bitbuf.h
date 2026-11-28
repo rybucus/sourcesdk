@@ -708,7 +708,7 @@ inline float bf_read::ReadBitFloat()
 	return *((float*)&val);
 }
 
-inline unsigned int bf_read::ReadUBitLong( int numbits )
+inline unsigned int bf_read::ReadUBitLong( int numbits ) RESTRICT
 {
 	if ( (m_iCurBit+numbits) > m_nDataBits )
 	{
